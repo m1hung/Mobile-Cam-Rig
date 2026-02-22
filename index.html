@@ -20,12 +20,13 @@
             --text-primary: #ffffff;
             --text-secondary: #8e8e93;
 
-            /* Accent Colors (Consistent across modes) */
+            /* Accent Colors */
             --primary-color: #0a84ff;
             --danger-color: #ff453a;
             --success-color: #32d74b;
             --warning-color: #ff9f0a;
             --paused-color: #ffd60a;
+            --bookmark-color: #5e5ce6;
             
             --border-radius: 16px;
         }
@@ -57,8 +58,9 @@
             background-color: var(--bg-color);
             color: var(--text-primary);
             -webkit-font-smoothing: antialiased;
-            padding-bottom: 40px;
-            transition: background-color 0.3s, color 0.3s;
+            padding-bottom: 110px; 
+            /* Kept color transitions for smooth light/dark mode toggling only */
+            transition: background-color 0.2s, color 0.2s;
         }
 
         /* Header */
@@ -73,7 +75,6 @@
             align-items: center;
             z-index: 100;
             border-bottom: 1px solid var(--border-color);
-            transition: background-color 0.3s, border-color 0.3s;
         }
 
         .header-left {
@@ -86,13 +87,10 @@
             height: 28px;
             width: auto;
             border-radius: 6px;
-            transition: all 0.3s ease;
             display: block;
         }
 
-        .app-logo.hidden {
-            display: none;
-        }
+        .app-logo.hidden { display: none; }
 
         header h1 {
             font-size: 18px;
@@ -112,34 +110,6 @@
             color: var(--text-primary);
         }
 
-        .btn-record-all {
-            background-color: var(--success-color);
-            color: #000;
-            border: none;
-            padding: 10px 14px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-        }
-        
-        .btn-record-all.recording {
-            background-color: var(--danger-color);
-            color: white;
-            animation: pulse-red 1.5s infinite;
-        }
-
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(255, 69, 58, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 69, 58, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 69, 58, 0); }
-        }
-
         /* Global Controls Panel */
         .global-controls {
             padding: 15px 20px;
@@ -149,13 +119,14 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            transition: background-color 0.3s;
         }
 
         .schema-header-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap; 
+            gap: 12px;
         }
 
         .schema-header {
@@ -169,24 +140,22 @@
         .schema-actions {
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
-        /* CUSTOM BUTTONS */
         .btn-edit-schema, .btn-toggle-logo {
             background-color: var(--element-bg);
             border: 1px solid var(--element-border);
-            padding: 8px 12px;
+            padding: 12px 18px; 
             border-radius: 12px;
-            font-size: 12px;
+            font-size: 14px; 
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
         }
         
         .btn-edit-schema { color: var(--primary-color); }
         .btn-toggle-logo { color: var(--text-secondary); }
-
-        .btn-edit-schema:active, .btn-toggle-logo:active { opacity: 0.8; }
+        .btn-edit-schema:active, .btn-toggle-logo:active { opacity: 0.7; }
 
         /* Custom Dropdown */
         .dropdown { position: relative; width: 100%; }
@@ -204,7 +173,6 @@
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            transition: all 0.2s;
         }
 
         .dropdown-toggle.has-selection {
@@ -235,32 +203,11 @@
             border-bottom: 1px solid var(--border-color);
             font-size: 14px;
             cursor: pointer;
-            transition: background-color 0.2s;
         }
 
         .dropdown-item:last-child { border-bottom: none; }
         .dropdown-item:active { background-color: var(--element-bg); }
-        
-        .dropdown-item.active {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s, opacity 0.2s;
-        }
-
-        button:active { opacity: 0.8; }
-        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .dropdown-item.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); font-weight: 600; }
 
         .control-row {
             display: flex;
@@ -269,8 +216,9 @@
             padding-top: 15px;
         }
 
-        .btn-add { background-color: var(--element-bg); color: var(--success-color); flex: 1; border: 1px solid transparent; }
-        .btn-toggle-view { background-color: var(--element-bg); color: var(--primary-color); flex: 1; border: 1px solid transparent;}
+        .btn-add { background-color: var(--element-bg); color: var(--success-color); flex: 1; border: 1px solid transparent; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-toggle-view { background-color: var(--element-bg); color: var(--primary-color); flex: 1; border: 1px solid transparent; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;}
+        .btn-add:active, .btn-toggle-view:active { opacity: 0.7; }
 
         /* Computer List */
         .computer-list { display: flex; flex-direction: column; gap: 15px; padding: 0 15px; }
@@ -282,7 +230,6 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: background-color 0.3s;
         }
 
         .camera-feed {
@@ -292,7 +239,6 @@
             display: flex; align-items: center; justify-content: center;
             color: var(--text-secondary);
             font-size: 12px;
-            transition: background 0.3s;
         }
 
         .status-badge {
@@ -320,11 +266,14 @@
         .drive-status { display: flex; flex-direction: column; gap: 5px; }
         .drive-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); }
         .progress-bar { width: 100%; height: 6px; background-color: var(--element-bg); border-radius: 3px; overflow: hidden; }
-        .progress-fill { height: 100%; background-color: var(--primary-color); transition: width 0.3s ease; }
+        .progress-fill { height: 100%; background-color: var(--primary-color); }
         .progress-fill.full { background-color: var(--danger-color); }
 
         /* Actions */
         .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .card-actions button { padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .card-actions button:active { opacity: 0.7; }
+        .card-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
         
         .btn-record-single { background-color: transparent; border: 1px solid var(--success-color); color: var(--success-color); grid-column: span 2; }
         .btn-record-single.is-recording { background-color: var(--danger-color); border-color: var(--danger-color); color: white; }
@@ -346,7 +295,6 @@
         .minimal-card {
             background-color: var(--surface-color); border-radius: 12px; padding: 12px 15px;
             display: flex; flex-direction: column; gap: 8px; border-left: 4px solid transparent;
-            transition: background-color 0.3s;
         }
         .minimal-card.has-error { border-left-color: var(--warning-color); }
         .minimal-card.is-recording { border-left-color: var(--danger-color); }
@@ -365,7 +313,6 @@
         .modal-overlay {
             position: fixed; inset: 0; background-color: var(--modal-bg); backdrop-filter: blur(5px);
             z-index: 1000; display: none; justify-content: center; align-items: center; padding: 20px;
-            transition: background-color 0.3s;
         }
         .modal-overlay.active { display: flex; }
         
@@ -383,11 +330,9 @@
             color: var(--text-primary); border-radius: 8px; font-size: 14px; outline: none; appearance: none;
         }
 
-        /* Operator Multi-Select Styles */
         .operator-inputs { display: flex; gap: 8px; margin-bottom: 4px; }
         .operator-inputs select { flex: 1; min-width: 0; }
-        
-        .btn-add-op { background-color: var(--element-bg); border: 1px solid var(--element-border); color: var(--text-primary); padding: 10px; }
+        .btn-add-op { background-color: var(--element-bg); border: 1px solid var(--element-border); color: var(--text-primary); padding: 10px; border-radius: 8px; cursor: pointer;}
 
         .operator-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: -5px; }
         .op-tag {
@@ -397,8 +342,114 @@
         .op-tag span { cursor: pointer; font-weight: bold; font-size: 14px; line-height: 1; }
         
         .modal-actions { display: flex; gap: 10px; margin-top: 10px; }
-        .modal-actions button { flex: 1; }
+        .modal-actions button { flex: 1; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; }
         .btn-cancel { background-color: transparent; border: 1px solid var(--element-border); color: var(--text-secondary); }
+        .modal-actions button:not(.btn-cancel) { background-color: var(--primary-color); color: white; border: none; }
+
+        /* =========================================
+           UTILITY-FOCUSED INSTANT BOTTOM ACTION BAR
+           ========================================= */
+        .bottom-action-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--header-bg);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border-color);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            z-index: 100;
+        }
+
+        .btn-record-all {
+            height: 54px;
+            width: 100%; 
+            border-radius: 16px;
+            background-color: var(--success-color);
+            color: #000;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-record-all:active { opacity: 0.8; }
+
+        /* Instant Layout Snap when Recording */
+        .btn-record-all.recording {
+            width: 140px; 
+            border-radius: 27px; 
+            background-color: var(--danger-color);
+            color: white;
+            margin-left: 12px;
+        }
+
+        /* Bookmark Presets Container (Instant Display) */
+        .bookmark-container {
+            display: none; /* Hidden instantly */
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none; 
+            white-space: nowrap;
+            width: calc(100% - 152px); /* Takes remaining space minus Stop button & gap */
+        }
+        .bookmark-container::-webkit-scrollbar { display: none; }
+
+        .bookmark-container.show {
+            display: flex; /* Appears instantly */
+        }
+
+        .btn-bookmark-preset {
+            background-color: rgba(94, 92, 230, 0.15);
+            border: 1px solid var(--bookmark-color);
+            color: var(--text-primary);
+            padding: 0 16px;
+            height: 44px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-bookmark-preset:active {
+            background-color: var(--bookmark-color);
+            color: white;
+        }
+
+        /* Bookmark Toast Notification (Kept simple opacity fade so it isn't jarring) */
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--bookmark-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 700;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 1000;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        
+        .toast.show { opacity: 1; }
 
     </style>
 </head>
@@ -410,9 +461,6 @@
             <h1>Session Control</h1>
             <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Light/Dark Mode">☀️</button>
         </div>
-        <button class="btn-record-all" id="globalRecordBtn" onclick="toggleGlobalRecord()">
-            <span id="recordIcon">⏺</span> <span id="recordText">REC ALL</span>
-        </button>
     </header>
 
     <div class="global-controls">
@@ -441,6 +489,23 @@
     <div class="computer-list" id="computerList">
         </div>
 
+    <div class="bottom-action-bar" id="bottomActionBar">
+        
+        <div class="bookmark-container" id="bookmarkContainer">
+            <button class="btn-bookmark-preset" onclick="dropBookmark('⭐ Good Take')">⭐ Good Take</button>
+            <button class="btn-bookmark-preset" onclick="dropBookmark('❌ False Start')">❌ False Start</button>
+            <button class="btn-bookmark-preset" onclick="dropBookmark('💥 Action Mark')">💥 Action Mark</button>
+            <button class="btn-bookmark-preset" onclick="dropBookmark('📝 VFX Note')">📝 VFX Note</button>
+        </div>
+
+        <button class="btn-record-all" id="globalRecordBtn" onclick="toggleGlobalRecord()">
+            <span id="recordIcon">⏺</span> <span id="recordText">REC ALL</span>
+        </button>
+
+    </div>
+
+    <div id="toast" class="toast">🔖 Bookmark Dropped!</div>
+
     <div class="modal-overlay" id="metadataModal">
         <div class="modal-content">
             <h3>Edit Schema Tags</h3>
@@ -456,15 +521,12 @@
 
             <label>Crew Roster & Assinged Role</label>
             <div class="operator-inputs">
-                <select id="rosterSelect">
-                    </select>
-                <select id="roleSelect">
-                    </select>
+                <select id="rosterSelect"></select>
+                <select id="roleSelect"></select>
             </div>
             <button class="btn-add-op" onclick="addOperator()">+ Add Crew Member</button>
             
-            <div class="operator-tags" id="selectedOperators">
-                </div>
+            <div class="operator-tags" id="selectedOperators"></div>
 
             <label>Equipment Type</label>
             <select id="metaEq">
@@ -583,6 +645,19 @@
             } else {
                 logo.classList.add('hidden');
             }
+        }
+
+        // Bookmark Action
+        function dropBookmark(tagName) {
+            const toast = document.getElementById('toast');
+            toast.innerText = `${tagName} Saved!`; 
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 1500);
+            
+            console.log(`Bookmark [${tagName}] saved at timestamp: ` + new Date().toISOString());
         }
 
         // Core Render Function
@@ -764,15 +839,18 @@
                 list.appendChild(card);
             });
 
-            // Update UI Globals
+            // Update Global Bottom Bar State - INSTANT SNAP
             const recBtn = document.getElementById('globalRecordBtn');
-            const recText = document.getElementById('recordText');
+            const bookmarkContainer = document.getElementById('bookmarkContainer');
+
             if (isGlobalRecording) {
                 recBtn.classList.add('recording');
-                recText.innerText = "STOP ALL";
+                recBtn.innerHTML = '<span>⏹</span> <span>STOP ALL</span>';
+                bookmarkContainer.classList.add('show');
             } else {
                 recBtn.classList.remove('recording');
-                recText.innerText = "REC ALL";
+                recBtn.innerHTML = '<span>⏺</span> <span>REC ALL</span>';
+                bookmarkContainer.classList.remove('show');
             }
 
             const viewBtn = document.getElementById('viewToggleBtn');
@@ -956,7 +1034,6 @@
             render();
         }
 
-        // If ANY rig is recording, flip the global button to STOP ALL
         function checkGlobalRecordingValidity() {
             isGlobalRecording = computers.some(c => c.isRecording);
         }
