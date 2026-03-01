@@ -2,74 +2,78 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Multi-Cam Control Center</title>
     <style>
         :root {
-            /* Core Theme Colors - Dark (Default) */
+            /* Modern Dark Theme */
             --bg-color: #000000;
             --surface-color: #1c1c1e;
+            --surface-elevated: #2c2c2e;
             --header-bg: rgba(28, 28, 30, 0.85);
-            --border-color: #333333;
-            --element-bg: #2c2c2e;
-            --element-border: #3a3a3c;
-            --cam-feed-bg: linear-gradient(135deg, #2c2c2e, #1a1a1c);
-            --modal-bg: rgba(0, 0, 0, 0.8);
+            --border-color: #38383a;
+            --divider: #2c2c2e;
+            --modal-bg: rgba(0, 0, 0, 0.7);
             
-            /* Text Colors */
             --text-primary: #ffffff;
             --text-secondary: #8e8e93;
 
-            /* Accent Colors */
+            /* Core Accents */
             --primary-color: #0a84ff;
             --danger-color: #ff453a;
             --success-color: #32d74b;
             --warning-color: #ff9f0a;
-            --paused-color: #ffd60a;
-            --bookmark-color: #5e5ce6;
+            --bookmark-color: #bf5af2;
             
-            --border-radius: 16px;
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            
+            --shadow-sm: none;
+            --shadow-md: none;
         }
 
         [data-theme="light"] {
-            /* Core Theme Colors - Light */
+            /* Modern Light Theme */
             --bg-color: #f2f2f7;
             --surface-color: #ffffff;
-            --header-bg: rgba(255, 255, 255, 0.85);
+            --surface-elevated: #f2f2f7;
+            --header-bg: rgba(255, 255, 255, 0.9);
             --border-color: #e5e5ea;
-            --element-bg: #f2f2f7;
-            --element-border: #d1d1d6;
-            --cam-feed-bg: linear-gradient(135deg, #e5e5ea, #d1d1d6);
-            --modal-bg: rgba(0, 0, 0, 0.4);
+            --divider: #e5e5ea;
+            --modal-bg: rgba(0, 0, 0, 0.3);
             
-            /* Text Colors */
             --text-primary: #000000;
-            --text-secondary: #6c6c70;
+            --text-secondary: #8a8a8e;
+
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-primary);
             -webkit-font-smoothing: antialiased;
-            padding-bottom: 110px; 
-            /* Kept color transitions for smooth light/dark mode toggling only */
+            padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px)); 
             transition: background-color 0.2s, color 0.2s;
         }
 
-        /* Header */
+        /* --- Header & Top Navigation --- */
         header {
             position: sticky;
             top: 0;
             background: var(--header-bg);
-            backdrop-filter: blur(10px);
-            padding: 16px 20px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: calc(12px + env(safe-area-inset-top, 0px)) 20px 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -77,285 +81,268 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .app-logo {
-            height: 28px;
-            width: auto;
-            border-radius: 6px;
-            display: block;
-        }
-
+        .header-left, .header-right { display: flex; align-items: center; gap: 12px; }
+        
+        .app-logo { height: 26px; border-radius: 6px; }
         .app-logo.hidden { display: none; }
+        
+        header h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.5px; }
 
-        header h1 {
-            font-size: 18px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .theme-toggle {
-            background: transparent;
+        .icon-btn {
+            background: var(--surface-elevated);
             border: none;
-            font-size: 18px;
+            height: 36px; width: 36px;
+            border-radius: 50%;
+            font-size: 16px;
             cursor: pointer;
-            padding: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             color: var(--text-primary);
         }
 
-        /* Global Controls Panel */
-        .global-controls {
-            padding: 15px 20px;
-            background-color: var(--surface-color);
-            margin: 15px;
-            border-radius: var(--border-radius);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .schema-header-container {
+        /* --- Minimalist Dashboard --- */
+        .dashboard-header {
+            padding: 20px 20px 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap; 
             gap: 12px;
         }
 
-        .schema-header {
-            font-size: 12px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .metadata-pill {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            padding: 10px 16px;
+            border-radius: 30px;
+            font-size: 13px;
             font-weight: 600;
-        }
-
-        .schema-actions {
+            color: var(--primary-color);
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .btn-edit-schema, .btn-toggle-logo {
-            background-color: var(--element-bg);
-            border: 1px solid var(--element-border);
-            padding: 12px 18px; 
-            border-radius: 12px;
-            font-size: 14px; 
+        .view-toggle {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            padding: 10px 16px;
+            border-radius: 30px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-        }
-        
-        .btn-edit-schema { color: var(--primary-color); }
-        .btn-toggle-logo { color: var(--text-secondary); }
-        .btn-edit-schema:active, .btn-toggle-logo:active { opacity: 0.7; }
-
-        /* Custom Dropdown */
-        .dropdown { position: relative; width: 100%; }
-
-        .dropdown-toggle {
-            width: 100%;
-            background-color: var(--element-bg);
-            border: 1px solid var(--element-border);
             color: var(--text-primary);
-            padding: 14px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
+        }
+
+        /* --- Computer Cards --- */
+        .computer-list { display: flex; flex-direction: column; gap: 16px; padding: 10px 20px; }
+
+        .computer-card {
+            background-color: var(--surface-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: visible;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        /* Card Header */
+        .card-top {
+            padding: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            cursor: pointer;
+            border-bottom: 1px solid var(--divider);
         }
 
-        .dropdown-toggle.has-selection {
-            background-color: rgba(10, 132, 255, 0.1);
-            border-color: var(--primary-color);
-            color: var(--primary-color);
+        .card-title-area { display: flex; align-items: center; gap: 10px; }
+        
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; }
+        .dot-ready { background-color: var(--success-color); }
+        .dot-rec { background-color: var(--danger-color); box-shadow: 0 0 8px var(--danger-color); }
+        .dot-error { background-color: var(--warning-color); }
+
+        .card-title { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+        
+        .card-more-btn {
+            background: transparent; border: none; color: var(--text-secondary);
+            font-size: 20px; cursor: pointer; padding: 0 8px;
         }
 
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0; right: 0;
-            background-color: var(--surface-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            margin-top: 6px;
-            z-index: 50;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            overflow: hidden;
-        }
-
-        .dropdown-menu.active { display: block; }
-
-        .dropdown-item {
-            padding: 14px 15px;
-            color: var(--text-primary);
-            border-bottom: 1px solid var(--border-color);
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .dropdown-item:last-child { border-bottom: none; }
-        .dropdown-item:active { background-color: var(--element-bg); }
-        .dropdown-item.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); font-weight: 600; }
-
-        .control-row {
-            display: flex;
-            gap: 10px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 15px;
-        }
-
-        .btn-add { background-color: var(--element-bg); color: var(--success-color); flex: 1; border: 1px solid transparent; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        .btn-toggle-view { background-color: var(--element-bg); color: var(--primary-color); flex: 1; border: 1px solid transparent; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;}
-        .btn-add:active, .btn-toggle-view:active { opacity: 0.7; }
-
-        /* Computer List */
-        .computer-list { display: flex; flex-direction: column; gap: 15px; padding: 0 15px; }
-
-        /* Detailed Card Styles */
-        .computer-card {
-            background-color: var(--surface-color);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
+        /* Camera Feed */
         .camera-feed {
-            width: 100%; height: 180px;
+            width: 100%; height: 160px;
             background: var(--cam-feed-bg);
-            position: relative;
             display: flex; align-items: center; justify-content: center;
             color: var(--text-secondary);
             font-size: 12px;
+            font-weight: 500;
         }
 
-        .status-badge {
-            padding: 4px 8px; border-radius: 12px;
-            font-size: 10px; font-weight: 700; text-transform: uppercase; text-align: center;
-        }
-        
-        .camera-feed .status-badge { position: absolute; top: 10px; left: 10px; }
-
-        .status-rec { background: var(--danger-color); color: white; }
-        .status-ready { background: var(--success-color); color: #000; }
-        .status-error { background: var(--warning-color); color: black; }
-
-        .card-details { padding: 15px; display: flex; flex-direction: column; gap: 15px; }
-        .card-header h2 { font-size: 16px; margin-bottom: 4px; }
-
-        .metadata-tags {
-            font-size: 11px; color: var(--text-secondary); background: var(--element-bg);
-            padding: 6px 10px; border-radius: 6px; display: inline-block; line-height: 1.4;
+        /* Card Footer */
+        .card-bottom {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
-        .metadata-tags strong { color: var(--primary-color); }
-
-        /* Drive Status */
-        .drive-status { display: flex; flex-direction: column; gap: 5px; }
-        .drive-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); }
-        .progress-bar { width: 100%; height: 6px; background-color: var(--element-bg); border-radius: 3px; overflow: hidden; }
+        .drive-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .drive-text { font-size: 11px; font-weight: 600; color: var(--text-secondary); display: flex; justify-content: space-between; }
+        .progress-bar { width: 100%; height: 4px; background-color: var(--surface-elevated); border-radius: 2px; overflow: hidden; }
         .progress-fill { height: 100%; background-color: var(--primary-color); }
         .progress-fill.full { background-color: var(--danger-color); }
 
-        /* Actions */
-        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .card-actions button { padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        .card-actions button:active { opacity: 0.7; }
-        .card-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
-        
-        .btn-record-single { background-color: transparent; border: 1px solid var(--success-color); color: var(--success-color); grid-column: span 2; }
-        .btn-record-single.is-recording { background-color: var(--danger-color); border-color: var(--danger-color); color: white; }
-        
-        .btn-mount { background-color: var(--element-bg); border: 1px solid transparent; color: var(--text-primary); }
-        .btn-mount.mounted { background-color: transparent; border-color: var(--warning-color); color: var(--warning-color); }
-        
-        .btn-erase { background-color: transparent; border: 1px solid var(--warning-color); color: var(--warning-color); }
-        .btn-remove { background-color: transparent; border: 1px solid var(--danger-color); color: var(--danger-color); grid-column: span 2; }
+        .btn-card-rec {
+            background-color: var(--surface-elevated);
+            color: var(--success-color);
+            border: none;
+            height: 40px; width: 40px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn-card-rec.is-recording {
+            background-color: rgba(255, 69, 58, 0.15);
+            color: var(--danger-color);
+        }
 
-        /* Diagnostics */
+        /* Diagnostics Banner */
         .diagnostics {
-            background-color: rgba(255, 69, 58, 0.1); border-left: 3px solid var(--danger-color);
-            padding: 10px; border-radius: 4px; font-size: 12px; color: #ff6961; display: none;
+            background-color: rgba(255, 159, 10, 0.1);
+            color: var(--warning-color);
+            padding: 10px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            display: none;
         }
         .has-error .diagnostics { display: block; }
 
-        /* Minimal Card Styles */
-        .minimal-card {
-            background-color: var(--surface-color); border-radius: 12px; padding: 12px 15px;
-            display: flex; flex-direction: column; gap: 8px; border-left: 4px solid transparent;
+        /* Secondary Actions Menu */
+        .card-menu {
+            display: none;
+            padding: 12px 16px;
+            background-color: var(--surface-color);
+            border-top: 1px solid var(--divider);
+            gap: 8px;
+            flex-wrap: wrap;
+            border-bottom-left-radius: var(--radius-lg);
+            border-bottom-right-radius: var(--radius-lg);
         }
-        .minimal-card.has-error { border-left-color: var(--warning-color); }
-        .minimal-card.is-recording { border-left-color: var(--danger-color); }
-        .minimal-main { display: flex; justify-content: space-between; align-items: center; }
-        .minimal-left { display: flex; align-items: center; gap: 12px; }
-        .minimal-left h2 { font-size: 15px; margin: 0; }
-        .minimal-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; width: 80px; }
-        .minimal-drive-text { font-size: 11px; color: var(--text-secondary); }
-        .minimal-card .progress-bar { width: 100%; height: 4px; }
-        .minimal-diagnostics {
-            display: block; padding: 8px; margin-top: 4px; background-color: rgba(255, 159, 10, 0.1); 
-            border-left-color: var(--warning-color); color: #ffb340;
+        .card-menu.active { display: flex; }
+        
+        .menu-btn {
+            flex: 1;
+            background-color: var(--surface-elevated);
+            color: var(--text-primary);
+            border: none;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            font-size: 12px; font-weight: 600;
+            cursor: pointer;
+        }
+        .menu-btn.warning { color: var(--warning-color); }
+        .menu-btn.danger { color: var(--danger-color); }
+
+        /* Add Rig FAB/Button */
+        .btn-add-rig-dashed {
+            background: transparent;
+            border: 2px dashed var(--border-color);
+            color: var(--text-secondary);
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
         }
 
-        /* Modal Styles */
+        /* --- Minimal Card Styles --- */
+        .minimal-card {
+            background-color: var(--surface-color); border-radius: var(--radius-md); padding: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
+        }
+        .minimal-left { display: flex; align-items: center; gap: 12px; }
+        .minimal-left h2 { font-size: 15px; font-weight: 600; margin: 0; }
+        .minimal-right { display: flex; align-items: center; gap: 16px; }
+        .minimal-drive { width: 60px; }
+
+        /* --- Modals --- */
         .modal-overlay {
-            position: fixed; inset: 0; background-color: var(--modal-bg); backdrop-filter: blur(5px);
-            z-index: 1000; display: none; justify-content: center; align-items: center; padding: 20px;
+            position: fixed; inset: 0; background-color: var(--modal-bg); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            z-index: 1000; display: none; justify-content: center; align-items: flex-end; padding: 20px;
         }
         .modal-overlay.active { display: flex; }
         
         .modal-content {
-            background-color: var(--surface-color); padding: 25px; border-radius: var(--border-radius);
-            width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 15px;
-            border: 1px solid var(--border-color);
+            background-color: var(--surface-color); padding: 24px; border-radius: var(--radius-lg);
+            width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px;
+            box-shadow: var(--shadow-md); margin-bottom: env(safe-area-inset-bottom, 20px);
+            max-height: 85vh; overflow-y: auto;
         }
         
-        .modal-content h3 { font-size: 18px; text-align: center; margin-bottom: 5px; }
-        .modal-content label { font-size: 12px; color: var(--text-secondary); margin-bottom: -10px; }
+        .modal-content h3 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+        .modal-content label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: -10px; }
         
-        .modal-content select, .modal-content input {
-            width: 100%; padding: 12px; background-color: var(--element-bg); border: 1px solid var(--element-border);
-            color: var(--text-primary); border-radius: 8px; font-size: 14px; outline: none; appearance: none;
+        .modal-content select, .modal-content input, .modal-content textarea {
+            width: 100%; padding: 14px; background-color: var(--surface-elevated); border: 1px solid var(--border-color);
+            color: var(--text-primary); border-radius: var(--radius-md); font-size: 14px; outline: none; appearance: none;
+        }
+        
+        /* Auto-fill webkit styling override for modern look */
+        input::-webkit-calendar-picker-indicator {
+            color: var(--text-secondary);
+            opacity: 1;
+            cursor: pointer;
+        }
+
+        .modal-content textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
         }
 
         .operator-inputs { display: flex; gap: 8px; margin-bottom: 4px; }
-        .operator-inputs select { flex: 1; min-width: 0; }
-        .btn-add-op { background-color: var(--element-bg); border: 1px solid var(--element-border); color: var(--text-primary); padding: 10px; border-radius: 8px; cursor: pointer;}
+        .operator-inputs input, .operator-inputs select { flex: 1; min-width: 0; }
+        .btn-add-op { background-color: var(--element-bg); border: 1px solid var(--element-border); color: var(--text-primary); padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px;}
 
         .operator-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: -5px; }
         .op-tag {
             background-color: rgba(10, 132, 255, 0.15); color: var(--primary-color); border: 1px solid var(--primary-color);
-            padding: 4px 10px; border-radius: 12px; font-size: 11px; display: flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 14px; font-size: 12px; display: flex; align-items: center; gap: 8px;
         }
-        .op-tag span { cursor: pointer; font-weight: bold; font-size: 14px; line-height: 1; }
+        .op-tag span { cursor: pointer; font-weight: bold; font-size: 16px; line-height: 1; }
         
-        .modal-actions { display: flex; gap: 10px; margin-top: 10px; }
-        .modal-actions button { flex: 1; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        .btn-cancel { background-color: transparent; border: 1px solid var(--element-border); color: var(--text-secondary); }
-        .modal-actions button:not(.btn-cancel) { background-color: var(--primary-color); color: white; border: none; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
+        .modal-actions button { flex: 1; padding: 14px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; border: none;}
+        .btn-cancel { background-color: var(--surface-elevated); color: var(--text-primary); }
+        .btn-primary { background-color: var(--primary-color); color: white; }
 
-        /* =========================================
-           UTILITY-FOCUSED INSTANT BOTTOM ACTION BAR
-           ========================================= */
+        /* --- Bottom Action Bar --- */
         .bottom-action-bar {
             position: fixed;
             bottom: 0; left: 0; right: 0;
             background: var(--header-bg);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-top: 1px solid var(--border-color);
-            padding: 15px 20px;
+            padding: 12px 20px calc(16px + env(safe-area-inset-bottom, 0px)) 20px;
             display: flex;
             align-items: center;
             justify-content: flex-end;
@@ -363,92 +350,49 @@
         }
 
         .btn-record-all {
-            height: 54px;
-            width: 100%; 
-            border-radius: 16px;
-            background-color: var(--success-color);
-            color: #000;
-            border: none;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            height: 56px; width: 100%; 
+            border-radius: var(--radius-lg);
+            background-color: var(--text-primary); 
+            color: var(--bg-color);
+            border: none; cursor: pointer; font-weight: 700; font-size: 16px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         
-        .btn-record-all:active { opacity: 0.8; }
-
-        /* Instant Layout Snap when Recording */
         .btn-record-all.recording {
-            width: 140px; 
-            border-radius: 27px; 
+            width: 130px; 
+            border-radius: 30px; 
             background-color: var(--danger-color);
             color: white;
             margin-left: 12px;
         }
 
-        /* Bookmark Presets Container (Instant Display) */
         .bookmark-container {
-            display: none; /* Hidden instantly */
-            align-items: center;
-            gap: 8px;
-            overflow-x: auto;
-            scrollbar-width: none; 
-            white-space: nowrap;
-            width: calc(100% - 152px); /* Takes remaining space minus Stop button & gap */
+            display: none; 
+            align-items: center; gap: 8px; overflow-x: auto; scrollbar-width: none; white-space: nowrap;
+            width: calc(100% - 142px); 
         }
         .bookmark-container::-webkit-scrollbar { display: none; }
-
-        .bookmark-container.show {
-            display: flex; /* Appears instantly */
-        }
+        .bookmark-container.show { display: flex; }
 
         .btn-bookmark-preset {
-            background-color: rgba(94, 92, 230, 0.15);
-            border: 1px solid var(--bookmark-color);
+            background-color: var(--surface-elevated);
+            border: 1px solid var(--border-color);
             color: var(--text-primary);
-            padding: 0 16px;
-            height: 44px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .btn-bookmark-preset:active {
-            background-color: var(--bookmark-color);
-            color: white;
+            padding: 0 16px; height: 44px; border-radius: var(--radius-md);
+            font-weight: 600; font-size: 13px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; gap: 6px;
         }
 
-        /* Bookmark Toast Notification (Kept simple opacity fade so it isn't jarring) */
+        /* Toast */
         .toast {
             position: fixed;
-            bottom: 90px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--bookmark-color);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 700;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-            z-index: 1000;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
+            bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+            left: 50%; transform: translateX(-50%);
+            background-color: var(--text-primary);
+            color: var(--bg-color);
+            padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 700;
+            opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 1000;
+            box-shadow: var(--shadow-md);
         }
-        
         .toast.show { opacity: 1; }
 
     </style>
@@ -457,97 +401,108 @@
 
     <header>
         <div class="header-left">
-            <img id="appLogo" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230a84ff' rx='22'/><circle cx='50' cy='50' r='25' fill='white'/></svg>" class="app-logo" alt="Production Logo">
+            <img id="appLogo" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230a84ff' rx='10'/><circle cx='50' cy='50' r='25' fill='white'/></svg>" class="app-logo" alt="Production Logo">
             <h1>Session Control</h1>
-            <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Light/Dark Mode">☀️</button>
+        </div>
+        <div class="header-right">
+            <button class="icon-btn" onclick="openTicketModal()" title="Report Issue">🎫</button>
+            <button class="icon-btn" onclick="toggleLogo()" title="Toggle Logo">🖼️</button>
+            <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()">☀️</button>
         </div>
     </header>
 
-    <div class="global-controls">
-        <div class="schema-header-container">
-            <div class="schema-header">Apply Metadata Schema</div>
-            <div class="schema-actions">
-                <button class="btn-toggle-logo" onclick="toggleLogo()">🖼️ Toggle Logo</button>
-                <button class="btn-edit-schema" onclick="openMetadataModal()">⚙️ Custom Edit</button>
-            </div>
-        </div>
-        
-        <div class="dropdown">
-            <button class="dropdown-toggle" id="schemaDropdownBtn" onclick="toggleSchemaDropdown()">
-                Select Preset Schema <span>▼</span>
-            </button>
-            <div class="dropdown-menu" id="schemaDropdownMenu">
-                </div>
-        </div>
-
-        <div class="control-row">
-            <button class="btn-add" onclick="openAddRigModal()">+ Add Rig</button>
-            <button class="btn-toggle-view" id="viewToggleBtn" onclick="toggleView()">📸 Detailed View</button>
-        </div>
+    <div class="dashboard-header">
+        <button class="metadata-pill" onclick="openMetadataModal()" id="metaSummaryBtn">
+            🏷️ Schema: None
+        </button>
+        <button class="view-toggle" id="viewToggleBtn" onclick="toggleView()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+        </button>
     </div>
 
-    <div class="computer-list" id="computerList">
-        </div>
+    <div class="computer-list">
+        <div id="computerList">
+            </div>
+        <button class="btn-add-rig-dashed" onclick="openAddRigModal()">+ Add New Rig</button>
+    </div>
 
     <div class="bottom-action-bar" id="bottomActionBar">
-        
         <div class="bookmark-container" id="bookmarkContainer">
             <button class="btn-bookmark-preset" onclick="dropBookmark('⭐ Good Take')">⭐ Good Take</button>
-            <button class="btn-bookmark-preset" onclick="dropBookmark('❌ False Start')">❌ False Start</button>
-            <button class="btn-bookmark-preset" onclick="dropBookmark('💥 Action Mark')">💥 Action Mark</button>
-            <button class="btn-bookmark-preset" onclick="dropBookmark('📝 VFX Note')">📝 VFX Note</button>
+            <button class="btn-bookmark-preset" onclick="dropBookmark('❌ False Start')">❌ False</button>
+            <button class="btn-bookmark-preset" onclick="dropBookmark('💥 Action Mark')">💥 Action</button>
         </div>
-
         <button class="btn-record-all" id="globalRecordBtn" onclick="toggleGlobalRecord()">
-            <span id="recordIcon">⏺</span> <span id="recordText">REC ALL</span>
+            <span id="recordIcon">⏺</span> <span id="recordText">Start Session</span>
         </button>
-
     </div>
 
-    <div id="toast" class="toast">🔖 Bookmark Dropped!</div>
+    <div id="toast" class="toast">Action Successful!</div>
 
     <div class="modal-overlay" id="metadataModal">
         <div class="modal-content">
-            <h3>Edit Schema Tags</h3>
+            <h3>Session Metadata</h3>
             
+            <label>Quick Preset</label>
+            <select id="presetSelect" onchange="applyPresetFromDropdown(this.value)">
+                <option value="none">Custom / None</option>
+                <option value="1">Studio Setup</option>
+                <option value="2">Field Action</option>
+                <option value="3">Night Drone</option>
+                <option value="4">Interview B-Cam</option>
+            </select>
+
             <label>Location</label>
             <select id="metaLoc">
                 <option value="Studio A">Studio A</option>
-                <option value="Studio B">Studio B</option>
                 <option value="Ext. City">Ext. City</option>
                 <option value="Rooftop">Rooftop</option>
-                <option value="Office 2">Office 2</option>
             </select>
-
-            <label>Crew Roster & Assinged Role</label>
-            <div class="operator-inputs">
-                <select id="rosterSelect"></select>
-                <select id="roleSelect"></select>
-            </div>
-            <button class="btn-add-op" onclick="addOperator()">+ Add Crew Member</button>
             
-            <div class="operator-tags" id="selectedOperators"></div>
+            <label>Add Crew Member</label>
+            <div class="operator-inputs">
+                <input type="text" id="rosterInput" list="rosterList" placeholder="Type or select name...">
+                <datalist id="rosterList">
+                    </datalist>
+                
+                <select id="roleSelect" style="flex: 0.6;">
+                    <option value="Operator">Operator</option>
+                    <option value="1st AC">1st AC</option>
+                    <option value="DIT">DIT</option>
+                </select>
+            </div>
+            <button class="btn-add-op" onclick="addOperator()">+ Add to Session</button>
+            
+            <div class="operator-tags" id="selectedOperators">
+                </div>
 
             <label>Equipment Type</label>
             <select id="metaEq">
                 <option value="ARRI Alexa">ARRI Alexa</option>
                 <option value="RED Komodo">RED Komodo</option>
-                <option value="DJI Inspire">DJI Inspire</option>
                 <option value="Sony FX6">Sony FX6</option>
-                <option value="Crash Cam">Crash Cam</option>
-            </select>
-
-            <label>Shift</label>
-            <select id="metaShift">
-                <option value="Morning">Morning</option>
-                <option value="Afternoon">Afternoon</option>
-                <option value="Night">Night</option>
-                <option value="Swing">Swing</option>
             </select>
 
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeMetadataModal()">Cancel</button>
-                <button onclick="saveCustomMetadata()">Apply to Rigs</button>
+                <button class="btn-primary" onclick="saveCustomMetadata()">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="ticketModal">
+        <div class="modal-content">
+            <h3>Report Issue</h3>
+            <label>Issue Type</label>
+            <select id="ticketType">
+                <option value="Faulty Equipment">Faulty Equipment</option>
+                <option value="Connectivity">Connectivity Issue</option>
+            </select>
+            <label>Description</label>
+            <textarea id="ticketDescription" placeholder="Details..."></textarea>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeTicketModal()">Cancel</button>
+                <button class="btn-primary" onclick="submitTicket()" style="background-color: var(--warning-color); color:#000;">Submit</button>
             </div>
         </div>
     </div>
@@ -556,61 +511,42 @@
         <div class="modal-content">
             <h3>Add Camera Rig</h3>
             
-            <label>Select from Roster</label>
-            <select id="rigSelect">
-                <option value="Cam-Rig Alpha">Cam-Rig Alpha</option>
-                <option value="Cam-Rig Beta">Cam-Rig Beta</option>
-                <option value="Cam-Rig Gamma">Cam-Rig Gamma</option>
-                <option value="Drone Cam 1">Drone Cam 1</option>
-                <option value="Crane Cam">Crane Cam</option>
-                <option value="Ronin Steadicam">Ronin Steadicam</option>
-            </select>
-
-            <label>Or type a Custom Name</label>
-            <input type="text" id="customRigName" placeholder="e.g. Crash Cam 2">
+            <label>Rig Name</label>
+            <input type="text" id="rigNameInput" list="rigOptionsList" placeholder="Type name or select preset...">
+            <datalist id="rigOptionsList">
+                <option value="Cam-Rig Alpha">
+                <option value="Cam-Rig Beta">
+                <option value="Cam-Rig Gamma">
+                <option value="Drone Cam 1">
+                <option value="Steadicam 1">
+                <option value="Crash Cam">
+            </datalist>
 
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeAddRigModal()">Cancel</button>
-                <button onclick="confirmAddRig()">Add Rig</button>
+                <button class="btn-primary" onclick="confirmAddRig()">Add Rig</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Roster Data
+        // Roster Data for Autofill
         const employeeRoster = [
             "Sarah Jenkins",
             "Marcus Thorne",
             "David Chen",
             "Elena Rostova",
             "James Miller",
+            "Alex Mercer",
             "Unknown / TBD"
         ];
 
-        const defaultRoles = ["Operator", "1st AC", "2nd AC", "DIT", "Utility"];
-
         // Data Models
         const schemas = [
-            { 
-                id: 1, label: "Studio Setup",   
-                tags: { loc: "Studio A", ops: ["Sarah Jenkins (A-Cam)", "Elena Rostova (1st AC)"], eq: "ARRI Alexa", shift: "Morning" },
-                allowedRoles: ["A-Cam", "B-Cam", "1st AC", "2nd AC", "DIT", "Utility"]
-            },
-            { 
-                id: 2, label: "Field Action",   
-                tags: { loc: "Ext. City", ops: ["Marcus Thorne (Action Cam Op)"], eq: "RED Komodo", shift: "Afternoon" },
-                allowedRoles: ["Action Cam Op", "Steadicam Op", "1st AC", "Grip", "Utility"]
-            },
-            { 
-                id: 3, label: "Night Drone",    
-                tags: { loc: "Rooftop", ops: ["James Miller (Drone Pilot)"], eq: "DJI Inspire", shift: "Night" },
-                allowedRoles: ["Drone Pilot", "Gimbal Op", "Visual Observer"]
-            },
-            { 
-                id: 4, label: "Interview B-Cam",
-                tags: { loc: "Office 2", ops: ["Sarah Jenkins (Solo Op)"], eq: "Sony FX6", shift: "Morning" },
-                allowedRoles: ["Solo Op", "Sound Mixer", "PA"]
-            }
+            { id: '1', label: "Studio Setup", tags: { loc: "Studio A", eq: "ARRI Alexa" } },
+            { id: '2', label: "Field Action", tags: { loc: "Ext. City", eq: "RED Komodo" } },
+            { id: '3', label: "Night Drone",  tags: { loc: "Rooftop", eq: "DJI Inspire" } },
+            { id: '4', label: "Interview B",  tags: { loc: "Office 2", eq: "Sony FX6" } }
         ];
 
         // State
@@ -625,109 +561,69 @@
         let tempOperators = [];
 
         let computers = [
-            { id: 1, name: "Cam-Rig Alpha", isMounted: true, driveUsage: 95, isRecording: false, errors: ["Drive Full - Cannot record"], metadataObj: null },
-            { id: 2, name: "Cam-Rig Beta", isMounted: false, driveUsage: 42, isRecording: false, errors: ["Drive not mounted"], metadataObj: null },
+            { id: 1, name: "Cam-Rig Alpha", isMounted: true, driveUsage: 95, isRecording: false, errors: ["Drive Full"], showMenu: false },
+            { id: 2, name: "Cam-Rig Beta", isMounted: false, driveUsage: 42, isRecording: false, errors: ["Unmounted"], showMenu: false },
         ];
 
         // UI State Actions
         function toggleTheme() {
             currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', currentTheme);
-            const toggleBtn = document.getElementById('themeToggleBtn');
-            toggleBtn.innerText = currentTheme === 'dark' ? '☀️' : '🌙';
+            document.getElementById('themeToggleBtn').innerText = currentTheme === 'dark' ? '☀️' : '🌙';
         }
 
         function toggleLogo() {
             isLogoVisible = !isLogoVisible;
             const logo = document.getElementById('appLogo');
-            if (isLogoVisible) {
-                logo.classList.remove('hidden');
-            } else {
-                logo.classList.add('hidden');
-            }
+            isLogoVisible ? logo.classList.remove('hidden') : logo.classList.add('hidden');
         }
 
-        // Bookmark Action
-        function dropBookmark(tagName) {
+        function showToast(message, bgColor = "var(--text-primary)", textColor = "var(--bg-color)") {
             const toast = document.getElementById('toast');
-            toast.innerText = `${tagName} Saved!`; 
+            toast.innerText = message;
+            toast.style.backgroundColor = bgColor;
+            toast.style.color = textColor;
             toast.classList.add('show');
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 1500);
-            
-            console.log(`Bookmark [${tagName}] saved at timestamp: ` + new Date().toISOString());
+            setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
-        // Core Render Function
+        function dropBookmark(tagName) {
+            showToast(`🔖 ${tagName}`); 
+        }
+
+        // Ticketing
+        function openTicketModal() { document.getElementById('ticketModal').classList.add('active'); }
+        function closeTicketModal() { document.getElementById('ticketModal').classList.remove('active'); }
+        function submitTicket() { closeTicketModal(); showToast('🎟️ Ticket Submitted', 'var(--warning-color)', '#000'); }
+
+        // Render Logic
         function render() {
-            renderSchemas();
             renderComputers();
-            populateRosterDropdown();
+            updateDashboardHeader();
+            populateRosterDatalist();
         }
 
-        function populateRosterDropdown() {
-            const select = document.getElementById('rosterSelect');
-            if (select.children.length === 0) {
+        // Autofill Datalist Population
+        function populateRosterDatalist() {
+            const list = document.getElementById('rosterList');
+            if (list.children.length === 0) {
                 employeeRoster.forEach(emp => {
                     const opt = document.createElement('option');
                     opt.value = emp;
-                    opt.innerText = emp;
-                    select.appendChild(opt);
+                    list.appendChild(opt);
                 });
             }
         }
 
-        function populateRoleDropdown() {
-            const roleSelect = document.getElementById('roleSelect');
-            roleSelect.innerHTML = ''; 
-            
-            let rolesToUse = defaultRoles;
+        function updateDashboardHeader() {
+            const btn = document.getElementById('metaSummaryBtn');
             if (activeSchemaId) {
-                const schema = schemas.find(s => s.id === activeSchemaId);
-                if (schema && schema.allowedRoles) {
-                    rolesToUse = schema.allowedRoles;
-                }
-            }
-            
-            rolesToUse.forEach(role => {
-                const opt = document.createElement('option');
-                opt.value = role;
-                opt.innerText = role;
-                roleSelect.appendChild(opt);
-            });
-        }
-
-        function renderSchemas() {
-            const menu = document.getElementById('schemaDropdownMenu');
-            menu.innerHTML = '';
-            
-            const clearItem = document.createElement('div');
-            clearItem.className = `dropdown-item ${activeSchemaId === null && currentMetadataObj === null ? 'active' : ''}`;
-            clearItem.innerText = "None (Clear Metadata)";
-            clearItem.onclick = () => applyPreset(null);
-            menu.appendChild(clearItem);
-
-            schemas.forEach(schema => {
-                const item = document.createElement('div');
-                item.className = `dropdown-item ${activeSchemaId === schema.id ? 'active' : ''}`;
-                item.innerText = schema.label;
-                item.onclick = () => applyPreset(schema.id);
-                menu.appendChild(item);
-            });
-
-            const btn = document.getElementById('schemaDropdownBtn');
-            if (activeSchemaId) {
-                const activeSchema = schemas.find(s => s.id === activeSchemaId);
-                btn.innerHTML = `${activeSchema.label} <span>▼</span>`;
-                btn.classList.add('has-selection');
+                const s = schemas.find(x => x.id === activeSchemaId);
+                btn.innerText = `🏷️ Schema: ${s.label}`;
             } else if (currentMetadataObj) {
-                btn.innerHTML = `Custom Edit Applied <span>▼</span>`;
-                btn.classList.add('has-selection');
+                btn.innerText = `🏷️ Custom Metadata`;
             } else {
-                btn.innerHTML = `Select Preset Schema <span>▼</span>`;
-                btn.classList.remove('has-selection');
+                btn.innerText = `🏷️ Schema: None`;
             }
         }
 
@@ -737,251 +633,87 @@
 
             computers.forEach(comp => {
                 const isFull = comp.driveUsage >= 90;
-                let statusClass = "status-ready";
-                let statusText = "READY";
+                let statusClass = "dot-ready";
                 
-                if (comp.errors.length > 0) {
-                    statusClass = "status-error";
-                    statusText = "ERROR";
-                } else if (comp.isRecording) {
-                    statusClass = "status-rec";
-                    statusText = "REC";
-                }
-
-                // Format Metadata String
-                let metaString = "No Schema Applied";
-                if (comp.metadataObj) {
-                    const opsString = comp.metadataObj.ops && comp.metadataObj.ops.length > 0 
-                        ? comp.metadataObj.ops.join(', ') 
-                        : "None Selected";
-
-                    metaString = `
-                        <strong>Loc:</strong> ${comp.metadataObj.loc} | 
-                        <strong>Eq:</strong> ${comp.metadataObj.eq} <br>
-                        <strong>Shift:</strong> ${comp.metadataObj.shift} <br>
-                        <strong>Ops:</strong> ${opsString}
-                    `;
-                }
+                if (comp.errors.length > 0) statusClass = "dot-error";
+                else if (comp.isRecording) statusClass = "dot-rec";
 
                 const card = document.createElement('div');
 
                 if (isDetailedView) {
                     card.className = `computer-card ${comp.errors.length > 0 ? 'has-error' : ''}`;
                     card.innerHTML = `
-                        <div class="camera-feed">
-                            <div class="status-badge ${statusClass}">${statusText}</div>
-                            Live Camera Feed Offline
+                        <div class="card-top">
+                            <div class="card-title-area">
+                                <div class="status-dot ${statusClass}"></div>
+                                <div class="card-title">${comp.name}</div>
+                            </div>
+                            <button class="card-more-btn" onclick="toggleCardMenu(${comp.id})">⋮</button>
                         </div>
-                        <div class="card-details">
-                            <div class="card-header">
-                                <div>
-                                    <h2>${comp.name}</h2>
-                                    <div class="metadata-tags">${metaString}</div>
-                                </div>
+                        
+                        <div class="diagnostics">${comp.errors.join(', ')}</div>
+                        
+                        <div class="camera-feed">Live Feed Offline</div>
+                        
+                        <div class="card-bottom">
+                            <div class="drive-info">
+                                <div class="drive-text"><span>Storage</span><span>${comp.driveUsage}%</span></div>
+                                <div class="progress-bar"><div class="progress-fill ${isFull ? 'full' : ''}" style="width: ${comp.driveUsage}%"></div></div>
                             </div>
-                            
-                            <div class="drive-status">
-                                <div class="drive-header">
-                                    <span>Drive Storage</span>
-                                    <span>${comp.driveUsage}% Used</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill ${isFull ? 'full' : ''}" style="width: ${comp.driveUsage}%"></div>
-                                </div>
-                            </div>
+                            <button class="btn-card-rec ${comp.isRecording ? 'is-recording' : ''}" onclick="toggleSingleRecord(${comp.id})" ${comp.errors.length > 0 ? 'disabled' : ''}>
+                                ${comp.isRecording ? '⏹' : '⏺'}
+                            </button>
+                        </div>
 
-                            <div class="diagnostics">
-                                <strong>Errors Preventing Record:</strong><br>
-                                ${comp.errors.join('<br>')}
-                            </div>
-
-                            <div class="card-actions">
-                                <button class="btn-record-single ${comp.isRecording ? 'is-recording' : ''}" onclick="toggleSingleRecord(${comp.id})" ${comp.errors.length > 0 ? 'disabled' : ''}>
-                                    ${comp.isRecording ? '⏹ Stop Rec' : '⏺ Start Rec'}
-                                </button>
-                                <button class="btn-mount ${comp.isMounted ? 'mounted' : ''}" onclick="toggleMount(${comp.id})">
-                                    ${comp.isMounted ? '⏏ Unmount' : '⬇ Mount'}
-                                </button>
-                                <button class="btn-erase" onclick="eraseDrive(${comp.id})" ${!comp.isMounted || comp.isRecording ? 'disabled' : ''}>
-                                    ⚠️ Erase
-                                </button>
-                                <button class="btn-remove" onclick="removeComputer(${comp.id})">Remove Rig</button>
-                            </div>
+                        <div class="card-menu ${comp.showMenu ? 'active' : ''}">
+                            <button class="menu-btn ${comp.isMounted ? '' : 'warning'}" onclick="toggleMount(${comp.id})">${comp.isMounted ? '⏏ Unmount' : '⬇ Mount'}</button>
+                            <button class="menu-btn warning" onclick="eraseDrive(${comp.id})" ${!comp.isMounted || comp.isRecording ? 'disabled' : ''}>Erase</button>
+                            <button class="menu-btn danger" onclick="removeComputer(${comp.id})">Remove</button>
                         </div>
                     `;
                 } else {
-                    card.className = `minimal-card ${comp.errors.length > 0 ? 'has-error' : ''} ${comp.isRecording ? 'is-recording' : ''}`;
-                    let innerHTML = `
-                        <div class="minimal-main">
-                            <div class="minimal-left">
-                                <div class="status-badge ${statusClass}">${statusText}</div>
-                                <h2>${comp.name}</h2>
+                    card.className = `minimal-card ${comp.errors.length > 0 ? 'has-error' : ''}`;
+                    card.innerHTML = `
+                        <div class="minimal-left">
+                            <div class="status-dot ${statusClass}"></div>
+                            <h2>${comp.name}</h2>
+                        </div>
+                        <div class="minimal-right">
+                            <div class="minimal-drive">
+                                <div class="drive-text" style="font-size:10px; color:var(--text-secondary); margin-bottom:4px;">${comp.driveUsage}%</div>
+                                <div class="progress-bar"><div class="progress-fill ${isFull ? 'full' : ''}" style="width: ${comp.driveUsage}%"></div></div>
                             </div>
-                            <div class="minimal-right">
-                                <span class="minimal-drive-text">${comp.driveUsage}% Drive</span>
-                                <div class="progress-bar">
-                                    <div class="progress-fill ${isFull ? 'full' : ''}" style="width: ${comp.driveUsage}%"></div>
-                                </div>
-                            </div>
+                            <button class="btn-card-rec ${comp.isRecording ? 'is-recording' : ''}" style="height:32px; width:32px; font-size:12px;" onclick="toggleSingleRecord(${comp.id})" ${comp.errors.length > 0 ? 'disabled' : ''}>
+                                ${comp.isRecording ? '⏹' : '⏺'}
+                            </button>
                         </div>
                     `;
-                    
-                    if (comp.errors.length > 0) {
-                        innerHTML += `
-                            <div class="diagnostics minimal-diagnostics">
-                                <strong>Alert:</strong> ${comp.errors.join(', ')}
-                            </div>
-                        `;
-                    }
-                    card.innerHTML = innerHTML;
                 }
-                
                 list.appendChild(card);
             });
 
-            // Update Global Bottom Bar State - INSTANT SNAP
+            // Master Record Button Sync
             const recBtn = document.getElementById('globalRecordBtn');
             const bookmarkContainer = document.getElementById('bookmarkContainer');
 
             if (isGlobalRecording) {
                 recBtn.classList.add('recording');
-                recBtn.innerHTML = '<span>⏹</span> <span>STOP ALL</span>';
+                recBtn.innerHTML = '<span>⏹</span> <span>STOP</span>';
                 bookmarkContainer.classList.add('show');
             } else {
                 recBtn.classList.remove('recording');
-                recBtn.innerHTML = '<span>⏺</span> <span>REC ALL</span>';
+                recBtn.innerHTML = '<span>⏺</span> <span>Start Session</span>';
                 bookmarkContainer.classList.remove('show');
             }
-
-            const viewBtn = document.getElementById('viewToggleBtn');
-            viewBtn.innerText = isDetailedView ? "👀 Minimal View" : "📸 Detailed View";
         }
 
-        // Action: Dropdown Logic
-        function toggleSchemaDropdown() {
-            document.getElementById('schemaDropdownMenu').classList.toggle('active');
-        }
-
-        function closeSchemaDropdown() {
-            document.getElementById('schemaDropdownMenu').classList.remove('active');
-        }
-
-        // Action: Apply Preset Schema
-        function applyPreset(id) {
-            if (id === null || activeSchemaId === id) {
-                activeSchemaId = null;
-                currentMetadataObj = null;
-                computers.forEach(c => c.metadataObj = null);
-            } else {
-                activeSchemaId = id;
-                const schema = schemas.find(s => s.id === id);
-                currentMetadataObj = { ...schema.tags, ops: [...schema.tags.ops] };
-                computers.forEach(c => c.metadataObj = { ...currentMetadataObj, ops: [...currentMetadataObj.ops] });
-            }
-            closeSchemaDropdown();
+        // Card Actions
+        function toggleCardMenu(id) {
+            const comp = computers.find(c => c.id === id);
+            comp.showMenu = !comp.showMenu;
             render();
         }
 
-        // --- Operator Modal Logic ---
-        function openMetadataModal() {
-            if (currentMetadataObj) {
-                document.getElementById('metaLoc').value = currentMetadataObj.loc;
-                document.getElementById('metaEq').value = currentMetadataObj.eq;
-                document.getElementById('metaShift').value = currentMetadataObj.shift;
-                tempOperators = [...currentMetadataObj.ops];
-            } else {
-                tempOperators = [];
-            }
-            
-            populateRoleDropdown();
-            renderModalOperators();
-            document.getElementById('metadataModal').classList.add('active');
-        }
-
-        function closeMetadataModal() {
-            document.getElementById('metadataModal').classList.remove('active');
-        }
-
-        function renderModalOperators() {
-            const container = document.getElementById('selectedOperators');
-            container.innerHTML = '';
-            
-            tempOperators.forEach((op, index) => {
-                const tag = document.createElement('div');
-                tag.className = 'op-tag';
-                tag.innerHTML = `${op} <span onclick="removeOperator(${index})">&times;</span>`;
-                container.appendChild(tag);
-            });
-        }
-
-        function addOperator() {
-            const select = document.getElementById('rosterSelect');
-            const roleSelect = document.getElementById('roleSelect');
-            
-            const selectedName = select.value;
-            const selectedRole = roleSelect.value;
-            
-            const combinedString = `${selectedName} (${selectedRole})`;
-            
-            if (selectedName && !tempOperators.includes(combinedString)) {
-                tempOperators.push(combinedString);
-                renderModalOperators();
-            }
-        }
-
-        function removeOperator(index) {
-            tempOperators.splice(index, 1);
-            renderModalOperators();
-        }
-
-        function saveCustomMetadata() {
-            const customTags = {
-                loc: document.getElementById('metaLoc').value,
-                ops: [...tempOperators], 
-                eq: document.getElementById('metaEq').value,
-                shift: document.getElementById('metaShift').value
-            };
-
-            currentMetadataObj = customTags;
-            activeSchemaId = null; 
-            computers.forEach(c => c.metadataObj = { ...currentMetadataObj, ops: [...currentMetadataObj.ops] });
-            
-            closeMetadataModal();
-            render();
-        }
-
-        // Action: Add Rig Modal Logic
-        function openAddRigModal() {
-            document.getElementById('customRigName').value = ''; 
-            document.getElementById('addRigModal').classList.add('active');
-        }
-
-        function closeAddRigModal() {
-            document.getElementById('addRigModal').classList.remove('active');
-        }
-
-        function confirmAddRig() {
-            const selectValue = document.getElementById('rigSelect').value;
-            const customValue = document.getElementById('customRigName').value.trim();
-            const finalName = customValue !== '' ? customValue : selectValue;
-
-            computers.push({
-                id: ++computerIdCounter,
-                name: finalName,
-                isMounted: true,
-                driveUsage: Math.floor(Math.random() * 80), 
-                isRecording: isGlobalRecording,
-                errors: [],
-                metadataObj: currentMetadataObj ? { ...currentMetadataObj, ops: [...currentMetadataObj.ops] } : null
-            });
-            
-            closeAddRigModal();
-            render();
-        }
-
-        // Action: View, Mount, Record (Single), Erase, Remove, Record (Global)
-        function toggleView() { isDetailedView = !isDetailedView; render(); }
-        
         function toggleSingleRecord(id) {
             const comp = computers.find(c => c.id === id);
             if (!comp || comp.errors.length > 0) return;
@@ -992,16 +724,15 @@
 
         function toggleMount(id) {
             const comp = computers.find(c => c.id === id);
-            if (comp) {
-                comp.isMounted = !comp.isMounted;
-                if (!comp.isMounted) {
-                    comp.errors = ["Drive not mounted"];
-                    comp.isRecording = false; 
-                } else {
-                    comp.errors = [];
-                    if (comp.driveUsage >= 90) comp.errors.push("Drive Full - Cannot record");
-                }
+            comp.isMounted = !comp.isMounted;
+            if (!comp.isMounted) {
+                comp.errors = ["Unmounted"];
+                comp.isRecording = false; 
+            } else {
+                comp.errors = [];
+                if (comp.driveUsage >= 90) comp.errors.push("Drive Full");
             }
+            comp.showMenu = false; 
             checkGlobalRecordingValidity();
             render();
         }
@@ -1009,9 +740,10 @@
         function eraseDrive(id) {
             const comp = computers.find(c => c.id === id);
             if (!comp || !comp.isMounted || comp.isRecording) return;
-            if (confirm(`⚠️ WARNING ⚠️\n\nErase Drive on ${comp.name}? \n\nAll data will be permanently deleted.`)) {
+            if (confirm(`Erase ${comp.name}?`)) {
                 comp.driveUsage = 0; 
-                comp.errors = comp.errors.filter(e => e !== "Drive Full - Cannot record");
+                comp.errors = [];
+                comp.showMenu = false;
                 render();
             }
         }
@@ -1022,14 +754,14 @@
             render();
         }
 
+        // Global Actions
+        function toggleView() { isDetailedView = !isDetailedView; render(); }
+
         function toggleGlobalRecord() {
             isGlobalRecording = !isGlobalRecording;
             computers.forEach(comp => {
-                if (isGlobalRecording) {
-                    if (comp.errors.length === 0) { comp.isRecording = true; }
-                } else {
-                    comp.isRecording = false;
-                }
+                if (isGlobalRecording && comp.errors.length === 0) comp.isRecording = true;
+                else comp.isRecording = false;
             });
             render();
         }
@@ -1038,7 +770,89 @@
             isGlobalRecording = computers.some(c => c.isRecording);
         }
 
-        // Initial render
+        // Metadata & Crew
+        function openMetadataModal() { 
+            renderModalOperators();
+            document.getElementById('metadataModal').classList.add('active'); 
+        }
+        
+        function closeMetadataModal() { document.getElementById('metadataModal').classList.remove('active'); }
+        
+        function applyPresetFromDropdown(val) {
+            if(val === 'none') { activeSchemaId = null; return; }
+            activeSchemaId = val;
+            const s = schemas.find(x => x.id === val);
+            document.getElementById('metaLoc').value = s.tags.loc;
+            document.getElementById('metaEq').value = s.tags.eq;
+        }
+
+        function addOperator() {
+            const name = document.getElementById('rosterInput').value.trim();
+            const role = document.getElementById('roleSelect').value;
+            if (!name) return;
+            
+            const str = `${name} (${role})`;
+            if (!tempOperators.includes(str)) {
+                tempOperators.push(str);
+                document.getElementById('rosterInput').value = ''; // clear input
+                renderModalOperators();
+            }
+        }
+
+        function removeOperator(index) {
+            tempOperators.splice(index, 1);
+            renderModalOperators();
+        }
+
+        function renderModalOperators() {
+            const container = document.getElementById('selectedOperators');
+            container.innerHTML = '';
+            tempOperators.forEach((op, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'op-tag';
+                tag.innerHTML = `${op} <span onclick="removeOperator(${index})">&times;</span>`;
+                container.appendChild(tag);
+            });
+        }
+
+        function saveCustomMetadata() {
+            currentMetadataObj = {
+                loc: document.getElementById('metaLoc').value,
+                eq: document.getElementById('metaEq').value,
+                ops: [...tempOperators]
+            };
+            const presetVal = document.getElementById('presetSelect').value;
+            if(presetVal === 'none') activeSchemaId = null;
+            
+            closeMetadataModal();
+            render();
+        }
+
+        // Add Rig using new Autofill Input
+        function openAddRigModal() { 
+            document.getElementById('rigNameInput').value = ''; 
+            document.getElementById('addRigModal').classList.add('active'); 
+        }
+        
+        function closeAddRigModal() { document.getElementById('addRigModal').classList.remove('active'); }
+        
+        function confirmAddRig() {
+            const inputVal = document.getElementById('rigNameInput').value.trim();
+            const finalName = inputVal !== '' ? inputVal : `Camera Rig ${computerIdCounter + 1}`;
+
+            computers.push({
+                id: ++computerIdCounter, 
+                name: finalName,
+                isMounted: true, 
+                driveUsage: Math.floor(Math.random() * 80), 
+                isRecording: isGlobalRecording, 
+                errors: [], 
+                showMenu: false
+            });
+            closeAddRigModal();
+            render();
+        }
+
         render();
     </script>
 </body>
