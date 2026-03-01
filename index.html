@@ -170,11 +170,6 @@
         .dot-error { background-color: var(--warning-color); }
 
         .card-title { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
-        
-        .card-more-btn {
-            background: transparent; border: none; color: var(--text-secondary);
-            font-size: 20px; cursor: pointer; padding: 0 8px;
-        }
 
         /* Camera Feed */
         .camera-feed {
@@ -186,9 +181,9 @@
             font-weight: 500;
         }
 
-        /* Card Footer */
+        /* Card Footer - Primary Controls */
         .card-bottom {
-            padding: 16px;
+            padding: 16px 16px 12px 16px;
             display: flex;
             align-items: center;
             gap: 16px;
@@ -220,6 +215,31 @@
             color: var(--danger-color);
         }
 
+        /* Card Footer - Secondary Actions (Always Visible) */
+        .card-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            padding: 0 16px 16px 16px;
+        }
+
+        .action-btn {
+            background-color: var(--surface-elevated);
+            color: var(--text-primary);
+            border: none;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            font-size: 12px; 
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        
+        .action-btn:active { opacity: 0.7; }
+        .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .action-btn.warning { color: var(--warning-color); }
+        .action-btn.danger { color: var(--danger-color); }
+
         /* Diagnostics Banner */
         .diagnostics {
             background-color: rgba(255, 159, 10, 0.1);
@@ -231,32 +251,6 @@
             display: none;
         }
         .has-error .diagnostics { display: block; }
-
-        /* Secondary Actions Menu */
-        .card-menu {
-            display: none;
-            padding: 12px 16px;
-            background-color: var(--surface-color);
-            border-top: 1px solid var(--divider);
-            gap: 8px;
-            flex-wrap: wrap;
-            border-bottom-left-radius: var(--radius-lg);
-            border-bottom-right-radius: var(--radius-lg);
-        }
-        .card-menu.active { display: flex; }
-        
-        .menu-btn {
-            flex: 1;
-            background-color: var(--surface-elevated);
-            color: var(--text-primary);
-            border: none;
-            padding: 10px;
-            border-radius: var(--radius-sm);
-            font-size: 12px; font-weight: 600;
-            cursor: pointer;
-        }
-        .menu-btn.warning { color: var(--warning-color); }
-        .menu-btn.danger { color: var(--danger-color); }
 
         /* Add Rig FAB/Button */
         .btn-add-rig-dashed {
@@ -275,13 +269,24 @@
         /* --- Minimal Card Styles --- */
         .minimal-card {
             background-color: var(--surface-color); border-radius: var(--radius-md); padding: 16px;
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex; flex-direction: column; gap: 12px;
             border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
+        }
+        .minimal-top {
+            display: flex; justify-content: space-between; align-items: center;
         }
         .minimal-left { display: flex; align-items: center; gap: 12px; }
         .minimal-left h2 { font-size: 15px; font-weight: 600; margin: 0; }
         .minimal-right { display: flex; align-items: center; gap: 16px; }
         .minimal-drive { width: 60px; }
+        
+        .minimal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            border-top: 1px solid var(--divider);
+            padding-top: 12px;
+        }
 
         /* --- Modals --- */
         .modal-overlay {
@@ -305,18 +310,9 @@
             color: var(--text-primary); border-radius: var(--radius-md); font-size: 14px; outline: none; appearance: none;
         }
         
-        /* Auto-fill webkit styling override for modern look */
-        input::-webkit-calendar-picker-indicator {
-            color: var(--text-secondary);
-            opacity: 1;
-            cursor: pointer;
-        }
+        input::-webkit-calendar-picker-indicator { color: var(--text-secondary); opacity: 1; cursor: pointer; }
 
-        .modal-content textarea {
-            resize: vertical;
-            min-height: 80px;
-            font-family: inherit;
-        }
+        .modal-content textarea { resize: vertical; min-height: 80px; font-family: inherit; }
 
         .operator-inputs { display: flex; gap: 8px; margin-bottom: 4px; }
         .operator-inputs input, .operator-inputs select { flex: 1; min-width: 0; }
@@ -462,8 +458,7 @@
             <label>Add Crew Member</label>
             <div class="operator-inputs">
                 <input type="text" id="rosterInput" list="rosterList" placeholder="Type or select name...">
-                <datalist id="rosterList">
-                    </datalist>
+                <datalist id="rosterList"></datalist>
                 
                 <select id="roleSelect" style="flex: 0.6;">
                     <option value="Operator">Operator</option>
@@ -473,8 +468,7 @@
             </div>
             <button class="btn-add-op" onclick="addOperator()">+ Add to Session</button>
             
-            <div class="operator-tags" id="selectedOperators">
-                </div>
+            <div class="operator-tags" id="selectedOperators"></div>
 
             <label>Equipment Type</label>
             <select id="metaEq">
@@ -497,7 +491,14 @@
             <select id="ticketType">
                 <option value="Faulty Equipment">Faulty Equipment</option>
                 <option value="Connectivity">Connectivity Issue</option>
+                <option value="Hardware Damage">Hardware Damage</option>
+                <option value="Software Glitch">Software Glitch</option>
+                <option value="Other">Other</option>
             </select>
+            
+            <label>Affected Rig</label>
+            <select id="ticketRigSelect"></select>
+            
             <label>Description</label>
             <textarea id="ticketDescription" placeholder="Details..."></textarea>
             <div class="modal-actions">
@@ -510,7 +511,6 @@
     <div class="modal-overlay" id="addRigModal">
         <div class="modal-content">
             <h3>Add Camera Rig</h3>
-            
             <label>Rig Name</label>
             <input type="text" id="rigNameInput" list="rigOptionsList" placeholder="Type name or select preset...">
             <datalist id="rigOptionsList">
@@ -561,8 +561,8 @@
         let tempOperators = [];
 
         let computers = [
-            { id: 1, name: "Cam-Rig Alpha", isMounted: true, driveUsage: 95, isRecording: false, errors: ["Drive Full"], showMenu: false },
-            { id: 2, name: "Cam-Rig Beta", isMounted: false, driveUsage: 42, isRecording: false, errors: ["Unmounted"], showMenu: false },
+            { id: 1, name: "Cam-Rig Alpha", isMounted: true, driveUsage: 95, isRecording: false, errors: ["Drive Full"] },
+            { id: 2, name: "Cam-Rig Beta", isMounted: false, driveUsage: 42, isRecording: false, errors: ["Unmounted"] },
         ];
 
         // UI State Actions
@@ -592,7 +592,18 @@
         }
 
         // Ticketing
-        function openTicketModal() { document.getElementById('ticketModal').classList.add('active'); }
+        function openTicketModal() { 
+            const rigSelect = document.getElementById('ticketRigSelect');
+            rigSelect.innerHTML = '<option value="General">General / All Rigs</option>'; 
+            computers.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.name;
+                opt.innerText = c.name;
+                rigSelect.appendChild(opt);
+            });
+            document.getElementById('ticketDescription').value = '';
+            document.getElementById('ticketModal').classList.add('active'); 
+        }
         function closeTicketModal() { document.getElementById('ticketModal').classList.remove('active'); }
         function submitTicket() { closeTicketModal(); showToast('🎟️ Ticket Submitted', 'var(--warning-color)', '#000'); }
 
@@ -603,7 +614,6 @@
             populateRosterDatalist();
         }
 
-        // Autofill Datalist Population
         function populateRosterDatalist() {
             const list = document.getElementById('rosterList');
             if (list.children.length === 0) {
@@ -648,7 +658,6 @@
                                 <div class="status-dot ${statusClass}"></div>
                                 <div class="card-title">${comp.name}</div>
                             </div>
-                            <button class="card-more-btn" onclick="toggleCardMenu(${comp.id})">⋮</button>
                         </div>
                         
                         <div class="diagnostics">${comp.errors.join(', ')}</div>
@@ -665,27 +674,35 @@
                             </button>
                         </div>
 
-                        <div class="card-menu ${comp.showMenu ? 'active' : ''}">
-                            <button class="menu-btn ${comp.isMounted ? '' : 'warning'}" onclick="toggleMount(${comp.id})">${comp.isMounted ? '⏏ Unmount' : '⬇ Mount'}</button>
-                            <button class="menu-btn warning" onclick="eraseDrive(${comp.id})" ${!comp.isMounted || comp.isRecording ? 'disabled' : ''}>Erase</button>
-                            <button class="menu-btn danger" onclick="removeComputer(${comp.id})">Remove</button>
+                        <div class="card-actions">
+                            <button class="action-btn ${comp.isMounted ? '' : 'warning'}" onclick="toggleMount(${comp.id})">${comp.isMounted ? '⏏ Unmount' : '⬇ Mount'}</button>
+                            <button class="action-btn warning" onclick="eraseDrive(${comp.id})" ${!comp.isMounted || comp.isRecording ? 'disabled' : ''}>Erase</button>
+                            <button class="action-btn danger" onclick="removeComputer(${comp.id})">Remove</button>
                         </div>
                     `;
                 } else {
                     card.className = `minimal-card ${comp.errors.length > 0 ? 'has-error' : ''}`;
                     card.innerHTML = `
-                        <div class="minimal-left">
-                            <div class="status-dot ${statusClass}"></div>
-                            <h2>${comp.name}</h2>
-                        </div>
-                        <div class="minimal-right">
-                            <div class="minimal-drive">
-                                <div class="drive-text" style="font-size:10px; color:var(--text-secondary); margin-bottom:4px;">${comp.driveUsage}%</div>
-                                <div class="progress-bar"><div class="progress-fill ${isFull ? 'full' : ''}" style="width: ${comp.driveUsage}%"></div></div>
+                        <div class="minimal-top">
+                            <div class="minimal-left">
+                                <div class="status-dot ${statusClass}"></div>
+                                <h2>${comp.name}</h2>
                             </div>
-                            <button class="btn-card-rec ${comp.isRecording ? 'is-recording' : ''}" style="height:32px; width:32px; font-size:12px;" onclick="toggleSingleRecord(${comp.id})" ${comp.errors.length > 0 ? 'disabled' : ''}>
-                                ${comp.isRecording ? '⏹' : '⏺'}
-                            </button>
+                            <div class="minimal-right">
+                                <div class="minimal-drive">
+                                    <div class="drive-text" style="font-size:10px; color:var(--text-secondary); margin-bottom:4px;">${comp.driveUsage}%</div>
+                                    <div class="progress-bar"><div class="progress-fill ${isFull ? 'full' : ''}" style="width: ${comp.driveUsage}%"></div></div>
+                                </div>
+                                <button class="btn-card-rec ${comp.isRecording ? 'is-recording' : ''}" style="height:32px; width:32px; font-size:12px;" onclick="toggleSingleRecord(${comp.id})" ${comp.errors.length > 0 ? 'disabled' : ''}>
+                                    ${comp.isRecording ? '⏹' : '⏺'}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="minimal-actions">
+                            <button class="action-btn ${comp.isMounted ? '' : 'warning'}" onclick="toggleMount(${comp.id})">${comp.isMounted ? '⏏ Unmount' : '⬇ Mount'}</button>
+                            <button class="action-btn warning" onclick="eraseDrive(${comp.id})" ${!comp.isMounted || comp.isRecording ? 'disabled' : ''}>Erase</button>
+                            <button class="action-btn danger" onclick="removeComputer(${comp.id})">Remove</button>
                         </div>
                     `;
                 }
@@ -708,12 +725,6 @@
         }
 
         // Card Actions
-        function toggleCardMenu(id) {
-            const comp = computers.find(c => c.id === id);
-            comp.showMenu = !comp.showMenu;
-            render();
-        }
-
         function toggleSingleRecord(id) {
             const comp = computers.find(c => c.id === id);
             if (!comp || comp.errors.length > 0) return;
@@ -732,7 +743,6 @@
                 comp.errors = [];
                 if (comp.driveUsage >= 90) comp.errors.push("Drive Full");
             }
-            comp.showMenu = false; 
             checkGlobalRecordingValidity();
             render();
         }
@@ -743,7 +753,6 @@
             if (confirm(`Erase ${comp.name}?`)) {
                 comp.driveUsage = 0; 
                 comp.errors = [];
-                comp.showMenu = false;
                 render();
             }
         }
@@ -770,7 +779,7 @@
             isGlobalRecording = computers.some(c => c.isRecording);
         }
 
-        // Metadata & Crew
+        // Metadata 
         function openMetadataModal() { 
             renderModalOperators();
             document.getElementById('metadataModal').classList.add('active'); 
@@ -794,7 +803,7 @@
             const str = `${name} (${role})`;
             if (!tempOperators.includes(str)) {
                 tempOperators.push(str);
-                document.getElementById('rosterInput').value = ''; // clear input
+                document.getElementById('rosterInput').value = ''; 
                 renderModalOperators();
             }
         }
@@ -828,7 +837,7 @@
             render();
         }
 
-        // Add Rig using new Autofill Input
+        // Add Rig using Autofill Input
         function openAddRigModal() { 
             document.getElementById('rigNameInput').value = ''; 
             document.getElementById('addRigModal').classList.add('active'); 
@@ -846,8 +855,7 @@
                 isMounted: true, 
                 driveUsage: Math.floor(Math.random() * 80), 
                 isRecording: isGlobalRecording, 
-                errors: [], 
-                showMenu: false
+                errors: []
             });
             closeAddRigModal();
             render();
