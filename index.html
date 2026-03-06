@@ -6,1046 +6,295 @@
     <title>Multi-Cam Control Center</title>
     <style>
         :root {
-            /* Modern Dark Theme */
-            --bg-color: #0d0d0d;
-            --surface-color: #1a1a1c;
-            --surface-elevated: #262629;
-            --header-bg: rgba(26, 26, 28, 0.85);
-            --border-color: #333336;
-            --divider: #262629;
-            --modal-bg: rgba(0, 0, 0, 0.7);
-            
-            --text-primary: #f0f0f0;
-            --text-secondary: #9aa0a6;
-
-            /* Core Accents - Professional & Muted */
-            --primary-color: #4a6fa5; /* Slate Blue */
-            --danger-color: #b34d4d;  /* Muted Red */
-            --success-color: #5b8a5e; /* Sage Green */
-            --warning-color: #b58940; /* Muted Gold/Ochre */
-            --bookmark-color: #7a638f; /* Muted Plum */
-            
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            
-            --shadow-sm: none;
-            --shadow-md: none;
+            /* Theme Variables */
+            --bg-color: #0d0d0d; --surface-color: #1a1a1c; --surface-elevated: #262629;
+            --header-bg: rgba(26, 26, 28, 0.85); --border-color: #333336; --divider: #262629;
+            --modal-bg: rgba(0, 0, 0, 0.7); --text-primary: #f0f0f0; --text-secondary: #9aa0a6;
+            --primary-color: #4a6fa5; --danger-color: #b34d4d; --success-color: #5b8a5e;
+            --warning-color: #b58940; --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
         }
 
         [data-theme="light"] {
-            /* Modern Light Theme */
-            --bg-color: #f5f6f8;
-            --surface-color: #ffffff;
-            --surface-elevated: #eef0f3;
-            --header-bg: rgba(255, 255, 255, 0.9);
-            --border-color: #d1d5db;
-            --divider: #e5e7eb;
-            --modal-bg: rgba(0, 0, 0, 0.4);
-            
-            --text-primary: #202124;
-            --text-secondary: #5f6368;
-
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --bg-color: #f5f6f8; --surface-color: #ffffff; --surface-elevated: #eef0f3;
+            --header-bg: rgba(255, 255, 255, 0.9); --border-color: #d1d5db; --divider: #e5e7eb;
+            --modal-bg: rgba(0, 0, 0, 0.4); --text-primary: #202124; --text-secondary: #5f6368;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            -webkit-font-smoothing: antialiased;
-            padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px)); 
-            transition: background-color 0.2s, color 0.2s;
-        }
-
-        /* --- Header & Top Navigation --- */
-        header {
-            position: sticky;
-            top: 0;
-            background: var(--header-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: calc(12px + env(safe-area-inset-top, 0px)) 20px 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .header-left, .header-right { display: flex; align-items: center; gap: 12px; }
+        /* Base Resets & Layout */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text-primary); -webkit-font-smoothing: antialiased; padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px)); transition: background-color 0.2s, color 0.2s; }
         
+        /* Utility Classes */
+        .flex-row { display: flex; align-items: center; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .flex-center { display: flex; align-items: center; justify-content: center; }
+        
+        /* Header & Dash */
+        header { position: sticky; top: 0; background: var(--header-bg); backdrop-filter: blur(16px); padding: calc(12px + env(safe-area-inset-top, 0px)) 20px 12px; z-index: 100; border-bottom: 1px solid var(--border-color); }
         .app-logo { height: 26px; border-radius: 6px; }
-        .app-logo.hidden { display: none; }
-        
-        header h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.2px; }
-
-        .icon-btn {
-            background: var(--surface-elevated);
-            border: 1px solid var(--border-color);
-            height: 36px; width: 36px;
-            border-radius: 50%;
-            font-size: 14px;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--text-primary);
-            transition: background-color 0.2s;
-        }
+        header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; margin: 0; }
+        .icon-btn { background: var(--surface-elevated); border: 1px solid var(--border-color); height: 36px; width: 36px; border-radius: 50%; font-size: 14px; cursor: pointer; color: var(--text-primary); transition: 0.2s; }
         .icon-btn:hover { background: var(--border-color); }
+        .dashboard-header { padding: 20px 20px 10px; gap: 12px; }
+        .pill-btn { background: var(--surface-color); border: 1px solid var(--border-color); padding: 10px 16px; border-radius: 30px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-primary); }
 
-        /* --- Minimalist Dashboard --- */
-        .dashboard-header {
-            padding: 20px 20px 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .metadata-pill {
-            background-color: var(--surface-color);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-sm);
-            padding: 10px 16px;
-            border-radius: 30px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .view-toggle {
-            background-color: var(--surface-color);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-sm);
-            padding: 10px 16px;
-            border-radius: 30px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            color: var(--text-primary);
-        }
-
-        /* --- Computer Cards --- */
+        /* Computer Cards (Shared) */
         .computer-list { display: flex; flex-direction: column; gap: 16px; padding: 10px 20px; }
-
-        .computer-card {
-            background-color: var(--surface-color);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            overflow: visible;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid var(--border-color);
-            position: relative;
-        }
-
-        /* Card Header */
-        .card-top {
-            padding: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--divider);
-        }
-
-        .card-title-area { display: flex; align-items: center; gap: 10px; }
-        
+        .card-base { background: var(--surface-color); border-radius: var(--radius-lg); border: 1px solid var(--border-color); display: flex; flex-direction: column; }
         .status-dot { height: 10px; width: 10px; border-radius: 50%; }
-        .dot-ready { background-color: var(--success-color); }
-        .dot-rec { background-color: var(--danger-color); box-shadow: 0 0 6px rgba(179, 77, 77, 0.6); }
-        .dot-error { background-color: var(--warning-color); }
-
-        .card-title { font-size: 15px; font-weight: 600; }
-
-        /* Camera Feed */
-        .camera-feed {
-            width: 100%; height: 160px;
-            background: var(--surface-elevated);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--text-secondary);
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        /* Card Footer - Primary Controls */
-        .card-bottom {
-            padding: 16px 16px 12px 16px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .drive-info {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .drive-text { font-size: 11px; font-weight: 600; color: var(--text-secondary); display: flex; justify-content: space-between; }
-        .progress-bar { width: 100%; height: 6px; background-color: var(--surface-elevated); border-radius: 3px; overflow: hidden; }
-        .progress-fill { height: 100%; background-color: var(--primary-color); }
-        .progress-fill.full { background-color: var(--danger-color); }
-
-        .btn-card-rec {
-            background-color: var(--surface-elevated);
-            color: var(--success-color);
-            border: 1px solid var(--border-color);
-            height: 36px; width: 36px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-card-rec.is-recording {
-            background-color: var(--danger-color);
-            border-color: var(--danger-color);
-            color: #ffffff;
-        }
-
-        /* Card Footer - Secondary Actions */
-        .card-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
-            padding: 0 16px 16px 16px;
-        }
-
-        .action-btn {
-            background-color: var(--surface-elevated);
-            color: var(--text-primary);
-            border: 1px solid transparent;
-            padding: 10px;
-            border-radius: var(--radius-sm);
-            font-size: 12px; 
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+        .dot-ready { background: var(--success-color); }
+        .dot-rec { background: var(--danger-color); box-shadow: 0 0 6px rgba(179, 77, 77, 0.6); }
+        .dot-error { background: var(--warning-color); }
+        .drive-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+        .drive-text { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+        .progress-bar { width: 100%; height: 6px; background: var(--surface-elevated); border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary-color); }
+        .progress-fill.full { background: var(--danger-color); }
         
-        .action-btn:hover { background-color: var(--border-color); }
-        .action-btn:active { opacity: 0.7; }
-        .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        /* Buttons */
+        .btn-card-rec { background: var(--surface-elevated); border: 1px solid var(--border-color); color: var(--success-color); height: 36px; width: 36px; border-radius: 50%; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .btn-card-rec.is-recording { background: var(--danger-color); border-color: var(--danger-color); color: #fff; }
+        .action-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 16px 16px; }
+        .action-btn { background: var(--surface-elevated); color: var(--text-primary); border: 1px solid transparent; padding: 10px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .action-btn:hover { background: var(--border-color); }
         .action-btn.warning { color: var(--warning-color); border-color: rgba(181, 137, 64, 0.3); }
         .action-btn.danger { color: var(--danger-color); border-color: rgba(179, 77, 77, 0.3); }
 
-        /* Diagnostics Banner */
-        .diagnostics {
-            background-color: rgba(181, 137, 64, 0.1);
-            color: var(--warning-color);
-            padding: 10px 16px;
-            font-size: 12px;
-            font-weight: 600;
-            border-bottom: 1px solid var(--border-color);
-            display: none;
-        }
+        /* Detailed View Specifics */
+        .card-top { padding: 16px; border-bottom: 1px solid var(--divider); }
+        .camera-feed { height: 160px; background: var(--surface-elevated); color: var(--text-secondary); font-size: 12px; font-weight: 500; }
+        .card-bottom { padding: 16px; gap: 16px; }
+        
+        /* Minimal View Specifics */
+        .minimal-card { border-radius: var(--radius-md); padding: 16px; gap: 12px; }
+        .minimal-actions { padding-top: 12px; border-top: 1px solid var(--divider); padding-bottom: 0; }
+
+        /* Diagnostics */
+        .diagnostics { background: rgba(181, 137, 64, 0.1); color: var(--warning-color); padding: 10px 16px; font-size: 12px; font-weight: 600; border-bottom: 1px solid var(--border-color); display: none; }
         .has-error .diagnostics { display: block; }
 
-        /* Add Rig FAB/Button */
-        .btn-add-rig-dashed {
-            background: transparent;
-            border: 2px dashed var(--border-color);
-            color: var(--text-secondary);
-            padding: 20px;
-            border-radius: var(--radius-lg);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 8px;
-            transition: background-color 0.2s;
-        }
-        .btn-add-rig-dashed:hover {
-            background-color: var(--surface-color);
-        }
-
-        /* --- Minimal Card Styles --- */
-        .minimal-card {
-            background-color: var(--surface-color); border-radius: var(--radius-md); padding: 16px;
-            display: flex; flex-direction: column; gap: 12px;
-            border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
-        }
-        .minimal-top {
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .minimal-left { display: flex; align-items: center; gap: 12px; }
-        .minimal-left h2 { font-size: 14px; font-weight: 600; margin: 0; }
-        .minimal-right { display: flex; align-items: center; gap: 16px; }
-        .minimal-drive { width: 60px; }
-        
-        .minimal-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
-            border-top: 1px solid var(--divider);
-            padding-top: 12px;
-        }
-
-        /* --- Modals --- */
-        .modal-overlay {
-            position: fixed; inset: 0; background-color: var(--modal-bg); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-            z-index: 1000; display: none; justify-content: center; align-items: flex-end; padding: 20px;
-        }
+        /* Modals & Forms */
+        .modal-overlay { position: fixed; inset: 0; background: var(--modal-bg); z-index: 1000; display: none; padding: 20px; align-items: center; justify-content: center; }
         .modal-overlay.active { display: flex; }
-        
-        .modal-content {
-            background-color: var(--surface-color); padding: 24px; border-radius: var(--radius-lg);
-            width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px;
-            box-shadow: var(--shadow-md); margin-bottom: env(safe-area-inset-bottom, 20px);
-            max-height: 85vh; overflow-y: auto; border: 1px solid var(--border-color);
-        }
-        
-        .modal-content h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-        .modal-content label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: -10px; }
-        
-        .modal-content select, .modal-content input, .modal-content textarea {
-            width: 100%; padding: 12px; background-color: var(--surface-elevated); border: 1px solid var(--border-color);
-            color: var(--text-primary); border-radius: var(--radius-sm); font-size: 14px; outline: none; appearance: none;
-        }
-        
-        input::-webkit-calendar-picker-indicator { color: var(--text-secondary); opacity: 1; cursor: pointer; }
+        .modal-content { background: var(--surface-color); padding: 24px; border-radius: var(--radius-lg); width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 16px; }
+        .modal-input { width: 100%; padding: 12px; background: var(--surface-elevated); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: var(--radius-sm); font-size: 14px; outline: none; }
+        .error-log-container { max-height: 200px; overflow-y: auto; background: var(--surface-elevated); padding: 12px; border-radius: var(--radius-sm); font-family: monospace; font-size: 12px; color: var(--warning-color); white-space: pre-wrap; border: 1px solid var(--border-color); user-select: text; }
 
-        .modal-content textarea { resize: vertical; min-height: 80px; font-family: inherit; }
-
-        .operator-inputs { display: flex; gap: 8px; margin-bottom: 4px; }
-        .operator-inputs input, .operator-inputs select { flex: 1; min-width: 0; }
-        .btn-add-op { background-color: var(--surface-elevated); border: 1px solid var(--border-color); color: var(--text-primary); padding: 10px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; font-size: 13px;}
-
-        .operator-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: -5px; }
-        .op-tag {
-            background-color: rgba(74, 111, 165, 0.15); color: var(--primary-color); border: 1px solid rgba(74, 111, 165, 0.3);
-            padding: 6px 12px; border-radius: 14px; font-size: 12px; display: flex; align-items: center; gap: 8px;
-        }
-        .op-tag span { cursor: pointer; font-weight: bold; font-size: 14px; line-height: 1; }
-        
-        .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
-        .modal-actions button { flex: 1; padding: 12px; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; border: 1px solid transparent;}
-        .btn-cancel { background-color: var(--surface-elevated); color: var(--text-primary); border-color: var(--border-color); }
-        .btn-primary { background-color: var(--primary-color); color: white; }
-
-        /* Error Log Styling */
-        .error-log-container {
-            max-height: 200px; overflow-y: auto; background-color: var(--surface-elevated); 
-            padding: 12px; border-radius: var(--radius-sm); font-family: monospace; 
-            font-size: 12px; color: var(--warning-color); white-space: pre-wrap;
-            border: 1px solid var(--border-color);
-            user-select: text; /* Allow manual selection if needed */
-        }
-        .error-log-empty { text-align: center; padding: 20px; font-style: italic; color: var(--text-secondary); }
-
-        /* --- Bottom Action Bar --- */
-        .bottom-action-bar {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: var(--header-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-top: 1px solid var(--border-color);
-            padding: 12px 20px calc(16px + env(safe-area-inset-bottom, 0px)) 20px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            z-index: 100;
-        }
-
-        .btn-record-all {
-            height: 50px; width: 100%; 
-            border-radius: var(--radius-md);
-            background-color: var(--success-color);
-            color: #ffffff;
-            border: none; cursor: pointer; font-weight: 600; font-size: 15px;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: all 0.2s;
-        }
-        
-        .btn-record-all.recording {
-            width: 130px; 
-            background-color: var(--danger-color);
-            margin-left: 12px;
-        }
-
-        .bookmark-container {
-            display: none; 
-            align-items: center; gap: 8px; overflow-x: auto; scrollbar-width: none; white-space: nowrap;
-            width: calc(100% - 142px); 
-        }
-        .bookmark-container::-webkit-scrollbar { display: none; }
-        .bookmark-container.show { display: flex; }
-
-        .btn-bookmark-preset {
-            background-color: var(--surface-elevated);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 0 16px; height: 40px; border-radius: var(--radius-sm);
-            font-weight: 500; font-size: 13px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; gap: 6px;
-        }
-
-        /* Toast */
-        .toast {
-            position: fixed;
-            bottom: calc(100px + env(safe-area-inset-bottom, 0px));
-            left: 50%; transform: translateX(-50%);
-            background-color: var(--surface-elevated);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            padding: 12px 24px; border-radius: var(--radius-md); font-size: 13px; font-weight: 600;
-            opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 1000;
-            box-shadow: var(--shadow-md);
-            white-space: nowrap;
-        }
+        /* Bottom Bar */
+        .bottom-action-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--header-bg); backdrop-filter: blur(16px); border-top: 1px solid var(--border-color); padding: 12px 20px calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 100; }
+        .btn-record-all { height: 50px; flex: 1; border-radius: var(--radius-md); background: var(--success-color); color: #fff; border: none; font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.2s; }
+        .btn-record-all.recording { background: var(--danger-color); }
+        .toast { position: fixed; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--surface-elevated); color: var(--text-primary); border: 1px solid var(--border-color); padding: 12px 24px; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 1000; }
         .toast.show { opacity: 1; }
-
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-left">
-            <img id="appLogo" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 100 100'><rect width='100' height='100' fill='%234a6fa5' rx='10'/><circle cx='50' cy='50' r='25' fill='white'/></svg>" class="app-logo" alt="Production Logo">
+    <header class="flex-between">
+        <div class="flex-row" style="gap: 12px;">
+            <svg id="appLogo" class="app-logo" xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='#4a6fa5' rx='10'/><circle cx='50' cy='50' r='25' fill='white'/></svg>
             <h1>Session Control</h1>
         </div>
-        <div class="header-right">
-            <button class="icon-btn" onclick="openErrorLogModal()" title="System Error Log">📋</button>
-            <button class="icon-btn" onclick="openTicketModal()" title="Report Issue">🎫</button>
-            <button class="icon-btn" onclick="toggleLogo()" title="Toggle Logo">🖼️</button>
-            <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()">☀️</button>
+        <div class="flex-row" style="gap: 12px;">
+            <button class="icon-btn flex-center" onclick="openModal('errorLogModal')">📋</button>
+            <button class="icon-btn flex-center" onclick="openModal('ticketModal')">🎫</button>
+            <button class="icon-btn flex-center" onclick="toggleTheme()" id="themeToggleBtn">☀️</button>
         </div>
     </header>
 
-    <div class="dashboard-header">
-        <button class="metadata-pill" onclick="openMetadataModal()" id="metaSummaryBtn">
-            🏷️ Schema: None
-        </button>
-        <button class="view-toggle" id="viewToggleBtn" onclick="toggleView()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-        </button>
+    <div class="dashboard-header flex-between">
+        <button class="pill-btn flex-row" style="flex:1; color:var(--primary-color)" onclick="openModal('metadataModal')" id="metaSummaryBtn">🏷️ Schema: None</button>
+        <button class="pill-btn flex-center" onclick="toggleView()">≡</button>
     </div>
 
-    <div class="computer-list">
-        <div id="computerList">
-            </div>
-        <button class="btn-add-rig-dashed" onclick="openAddRigModal()">+ Add New Rig</button>
-    </div>
+    <div class="computer-list" id="computerList"></div>
 
-    <div class="bottom-action-bar" id="bottomActionBar">
-        <div class="bookmark-container" id="bookmarkContainer">
-            <button class="btn-bookmark-preset" onclick="dropBookmark('⭐ Good Take')">⭐ Good Take</button>
-            <button class="btn-bookmark-preset" onclick="dropBookmark('❌ False Start')">❌ False</button>
-            <button class="btn-bookmark-preset" onclick="dropBookmark('💥 Action Mark')">💥 Action</button>
-        </div>
-        <button class="btn-record-all" id="globalRecordBtn" onclick="toggleGlobalRecord()">
-            <span id="recordIcon">⏺</span> <span id="recordText">Start Session</span>
+    <div class="bottom-action-bar flex-row" style="gap:12px">
+        <button class="btn-record-all flex-center" id="globalRecordBtn" onclick="toggleGlobalRecord()">
+            <span style="margin-right:8px">⏺</span> <span id="recordText">Start Session</span>
         </button>
     </div>
 
-    <div id="toast" class="toast">Action Successful!</div>
+    <div id="toast" class="toast"></div>
 
-    <div class="modal-overlay" id="errorLogModal">
-        <div class="modal-content">
-            <h3>System Error Log</h3>
-            <div class="error-log-container" id="errorLogContainer">
-                <div class="error-log-empty">No errors recorded.</div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeErrorLogModal()">Close</button>
-                <button class="btn-primary" onclick="copyErrorLog()">Copy Logs</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="metadataModal">
-        <div class="modal-content">
-            <h3>Session Metadata</h3>
-            
-            <label>Quick Preset</label>
-            <select id="presetSelect" onchange="applyPresetFromDropdown(this.value)">
-                <option value="none">Custom / None</option>
-                <option value="1">Studio Setup</option>
-                <option value="2">Field Action</option>
-                <option value="3">Night Drone</option>
-                <option value="4">Interview B-Cam</option>
-            </select>
-
-            <label>Location</label>
-            <select id="metaLoc">
-                <option value="Studio A">Studio A</option>
-                <option value="Ext. City">Ext. City</option>
-                <option value="Rooftop">Rooftop</option>
-            </select>
-            
-            <label>Add Crew Member</label>
-            <div class="operator-inputs">
-                <input type="text" id="rosterInput" list="rosterList" placeholder="Type or select name...">
-                <datalist id="rosterList"></datalist>
-                
-                <select id="roleSelect" style="flex: 0.6;">
-                    <option value="Operator">Operator</option>
-                    <option value="1st AC">1st AC</option>
-                    <option value="DIT">DIT</option>
-                </select>
-            </div>
-            <button class="btn-add-op" onclick="addOperator()">+ Add to Session</button>
-            
-            <div class="operator-tags" id="selectedOperators"></div>
-
-            <label>Equipment Type</label>
-            <select id="metaEq">
-                <option value="ARRI Alexa">ARRI Alexa</option>
-                <option value="RED Komodo">RED Komodo</option>
-                <option value="Sony FX6">Sony FX6</option>
-            </select>
-
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeMetadataModal()">Cancel</button>
-                <button class="btn-primary" onclick="saveCustomMetadata()">Apply</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="ticketModal">
-        <div class="modal-content">
-            <h3>Report Issue</h3>
-            <label>Issue Type</label>
-            <select id="ticketType">
-                <option value="Faulty Equipment">Faulty Equipment</option>
-                <option value="Connectivity">Connectivity Issue</option>
-                <option value="Hardware Damage">Hardware Damage</option>
-                <option value="Software Glitch">Software Glitch</option>
-                <option value="Other">Other</option>
-            </select>
-            
-            <label>Affected Rig</label>
-            <select id="ticketRigSelect"></select>
-            
-            <label>Description</label>
-            <textarea id="ticketDescription" placeholder="Details..."></textarea>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeTicketModal()">Cancel</button>
-                <button class="btn-primary" onclick="submitTicket()" style="background-color: var(--warning-color); color:#ffffff;">Submit</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="addRigModal">
-        <div class="modal-content">
-            <h3>Add Camera Rig</h3>
-            <label>Rig Name</label>
-            <input type="text" id="rigNameInput" list="rigOptionsList" placeholder="Type name or select preset...">
-            <datalist id="rigOptionsList">
-                <option value="Cam-Rig Alpha">
-                <option value="Cam-Rig Beta">
-                <option value="Cam-Rig Gamma">
-                <option value="Drone Cam 1">
-                <option value="Steadicam 1">
-                <option value="Crash Cam">
-            </datalist>
-
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeAddRigModal()">Cancel</button>
-                <button class="btn-primary" onclick="confirmAddRig()">Add Rig</button>
+    <div id="modalContainer">
+        <div class="modal-overlay" id="errorLogModal">
+            <div class="modal-content">
+                <h3 style="margin-bottom:0">System Error Log</h3>
+                <div class="error-log-container" id="errorLogContainer"></div>
+                <div class="flex-row" style="gap:10px; margin-top:8px">
+                    <button class="action-btn" style="flex:1" onclick="closeModal('errorLogModal')">Close</button>
+                    <button class="action-btn" style="flex:1; background:var(--primary-color); color:#fff" onclick="copyErrorLog()">Copy</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Error Logging State & Functions
-        let systemErrorLog = [];
+        // Data & State
+        let state = {
+            isRecording: false,
+            isDetailed: true,
+            theme: 'dark',
+            schema: null,
+            logs: [],
+            idCounter: 3,
+            computers: [
+                { id: 1, name: "Cam-Rig Alpha", mounted: true, usage: 95, rec: false, errors: [] },
+                { id: 2, name: "Cam-Rig Beta", mounted: false, usage: 42, rec: false, errors: [] },
+            ]
+        };
 
-        function getTimestamp() {
-            return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        }
-
-        function logError(entry) {
-            systemErrorLog.push(entry);
-            renderErrorLog();
-        }
-
-        function renderErrorLog() {
-            const container = document.getElementById('errorLogContainer');
-            if (systemErrorLog.length === 0) {
-                container.innerHTML = '<div class="error-log-empty">No errors recorded.</div>';
-            } else {
-                container.innerHTML = systemErrorLog.join('<br>');
-            }
-        }
-
-        function openErrorLogModal() {
-            renderErrorLog();
-            document.getElementById('errorLogModal').classList.add('active');
-        }
-
-        function closeErrorLogModal() {
-            document.getElementById('errorLogModal').classList.remove('active');
-        }
-
-        function copyErrorLog() {
-            if(systemErrorLog.length === 0) {
-                showToast('⚠️ No errors to copy', 'var(--warning-color)', '#ffffff');
-                return;
-            }
-
-            const textToCopy = systemErrorLog.join('\n');
-
-            // Fallback strategy for environments without secure context (like file:// or iframes)
-            const fallbackCopyTextToClipboard = (text) => {
-                var textArea = document.createElement("textarea");
-                textArea.value = text;
-                
-                // Avoid scrolling to bottom
-                textArea.style.top = "0";
-                textArea.style.left = "0";
-                textArea.style.position = "fixed";
-
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-
-                try {
-                    var successful = document.execCommand('copy');
-                    if (successful) {
-                        showToast('📋 Logs Copied', 'var(--primary-color)', '#ffffff');
-                        closeErrorLogModal();
-                    } else {
-                        showToast('❌ Copy Failed', 'var(--danger-color)', '#ffffff');
-                    }
-                } catch (err) {
-                    showToast('❌ Copy Error', 'var(--danger-color)', '#ffffff');
-                }
-                document.body.removeChild(textArea);
-            }
-
-            // Attempt to use the modern clipboard API, fallback if not available or blocked
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    showToast('📋 Logs Copied', 'var(--primary-color)', '#ffffff');
-                    closeErrorLogModal();
-                }).catch(() => {
-                    fallbackCopyTextToClipboard(textToCopy);
-                });
-            } else {
-                fallbackCopyTextToClipboard(textToCopy);
-            }
-        }
-
-        // Roster Data for Autofill
-        const employeeRoster = [
-            "Sarah Jenkins",
-            "Marcus Thorne",
-            "David Chen",
-            "Elena Rostova",
-            "James Miller",
-            "Alex Mercer",
-            "Unknown / TBD"
-        ];
-
-        // Data Models
-        const schemas = [
-            { id: '1', label: "Studio Setup", tags: { loc: "Studio A", eq: "ARRI Alexa" } },
-            { id: '2', label: "Field Action", tags: { loc: "Ext. City", eq: "RED Komodo" } },
-            { id: '3', label: "Night Drone",  tags: { loc: "Rooftop", eq: "DJI Inspire" } },
-            { id: '4', label: "Interview B",  tags: { loc: "Office 2", eq: "Sony FX6" } }
-        ];
-
-        // State
-        let isGlobalRecording = false;
-        let isDetailedView = true;
-        let isLogoVisible = true;
-        let activeSchemaId = null;
-        let currentMetadataObj = null; 
-        let computerIdCounter = 3;
-        let currentTheme = 'dark';
+        // Utility: Timestamps
+        const getTS = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         
-        let tempOperators = [];
+        // Boot Errors
+        state.computers[0].errors.push(`[${getTS()}] Drive Full`);
+        state.computers[1].errors.push(`[${getTS()}] Unmounted`);
+        state.computers.forEach(c => c.errors.forEach(e => state.logs.push(`${c.name}: ${e}`)));
 
-        // Initialize state with timestamps for baseline errors
-        const initTime = getTimestamp();
-        let computers = [
-            { id: 1, name: "Cam-Rig Alpha", isMounted: true, driveUsage: 95, isRecording: false, errors: [`[${initTime}] Drive Full`] },
-            { id: 2, name: "Cam-Rig Beta", isMounted: false, driveUsage: 42, isRecording: false, errors: [`[${initTime}] Unmounted`] },
-        ];
-
-        // Push baseline errors to logs on boot
-        computers.forEach(c => {
-            if(c.errors.length > 0) {
-                c.errors.forEach(e => logError(`${c.name}: ${e}`));
-            }
-        });
-
-        // UI State Actions
-        function toggleTheme() {
-            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', currentTheme);
-            document.getElementById('themeToggleBtn').innerText = currentTheme === 'dark' ? '☀️' : '🌙';
-        }
-
-        function toggleLogo() {
-            isLogoVisible = !isLogoVisible;
-            const logo = document.getElementById('appLogo');
-            isLogoVisible ? logo.classList.remove('hidden') : logo.classList.add('hidden');
-        }
-
-        // Updated showToast Function
-        let toastTimeout;
-        function showToast(message, bgColor = "var(--surface-elevated)", textColor = "var(--text-primary)") {
-            const toast = document.getElementById('toast');
-            toast.innerText = message;
-            toast.style.backgroundColor = bgColor;
-            toast.style.color = textColor;
-            toast.style.border = "none";
-            toast.classList.add('show');
-            
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
-        }
-
-        function dropBookmark(tagName) {
-            showToast(`🔖 ${tagName}`); 
-        }
-
-        // Ticketing
-        function openTicketModal() { 
-            const rigSelect = document.getElementById('ticketRigSelect');
-            rigSelect.innerHTML = '<option value="General">General / All Rigs</option>'; 
-            computers.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.name;
-                opt.innerText = c.name;
-                rigSelect.appendChild(opt);
-            });
-            document.getElementById('ticketDescription').value = '';
-            document.getElementById('ticketModal').classList.add('active'); 
-        }
-        function closeTicketModal() { document.getElementById('ticketModal').classList.remove('active'); }
-        function submitTicket() { closeTicketModal(); showToast('🎟️ Ticket Submitted', 'var(--warning-color)', '#ffffff'); }
-
-        // Render Logic
+        // --- Optimized Rendering ---
         function render() {
-            renderComputers();
-            updateDashboardHeader();
-            populateRosterDatalist();
+            renderList();
+            updateUI();
         }
 
-        function populateRosterDatalist() {
-            const list = document.getElementById('rosterList');
-            if (list.children.length === 0) {
-                employeeRoster.forEach(emp => {
-                    const opt = document.createElement('option');
-                    opt.value = emp;
-                    list.appendChild(opt);
-                });
-            }
-        }
-
-        function updateDashboardHeader() {
-            const btn = document.getElementById('metaSummaryBtn');
-            if (activeSchemaId) {
-                const s = schemas.find(x => x.id === activeSchemaId);
-                btn.innerText = `🏷️ Schema: ${s.label}`;
-            } else if (currentMetadataObj) {
-                btn.innerText = `🏷️ Custom Metadata`;
-            } else {
-                btn.innerText = `🏷️ Schema: None`;
-            }
-        }
-
-        function renderComputers() {
+        function renderList() {
             const list = document.getElementById('computerList');
-            list.innerHTML = '';
-
-            computers.forEach(comp => {
-                const isFull = comp.driveUsage >= 90;
-                let statusClass = "dot-ready";
-                
-                if (comp.errors.length > 0) statusClass = "dot-error";
-                else if (comp.isRecording) statusClass = "dot-rec";
-
-                const card = document.createElement('div');
-
-                if (isDetailedView) {
-                    card.className = `computer-card ${comp.errors.length > 0 ? 'has-error' : ''}`;
-                    card.innerHTML = `
-                        <div class="card-top">
-                            <div class="card-title-area">
-                                <div class="status-dot ${statusClass}"></div>
-                                <div class="card-title">${comp.name}</div>
-                            </div>
-                            <button class="btn-card-rec ${comp.isRecording ? 'is-recording' : ''}" onclick="toggleSingleRecord(${comp.id})">
-                                ${comp.isRecording ? '⏹' : '⏺'}
-                            </button>
-                        </div>
-                        
-                        <div class="diagnostics">${comp.errors.join('<br>')}</div>
-                        
-                        <div class="camera-feed">Live Feed Offline</div>
-                        
-                        <div class="card-bottom">
-                            <div class="drive-info">
-                                <div class="drive-text"><span>Storage</span><span>${comp.driveUsage}%</span></div>
-                                <div class="progress-bar"><div class="progress-fill ${isFull ? 'full' : ''}" style="width: ${comp.driveUsage}%"></div></div>
-                            </div>
-                        </div>
-
-                        <div class="card-actions">
-                            <button class="action-btn ${comp.isMounted ? '' : 'warning'}" onclick="toggleMount(${comp.id})">${comp.isMounted ? '⏏ Unmount' : '⬇ Mount'}</button>
-                            <button class="action-btn warning" onclick="eraseDrive(${comp.id})" ${!comp.isMounted || comp.isRecording ? 'disabled' : ''}>Erase</button>
-                            <button class="action-btn danger" onclick="removeComputer(${comp.id})">Remove</button>
-                        </div>
-                    `;
-                } else {
-                    card.className = `minimal-card ${comp.errors.length > 0 ? 'has-error' : ''}`;
-                    // Added diagnostics to minimal view
-                    card.innerHTML = `
-                        <div class="minimal-top">
-                            <div class="minimal-left">
-                                <div class="status-dot ${statusClass}"></div>
-                                <h2>${comp.name}</h2>
-                            </div>
-                            <div class="minimal-right">
-                                <div class="minimal-drive">
-                                    <div class="drive-text" style="font-size:10px; color:var(--text-secondary); margin-bottom:4px;">${comp.driveUsage}%</div>
-                                    <div class="progress-bar"><div class="progress-fill ${isFull ? 'full' : ''}" style="width: ${comp.driveUsage}%"></div></div>
-                                </div>
-                                <button class="btn-card-rec ${comp.isRecording ? 'is-recording' : ''}" style="height:32px; width:32px; font-size:12px;" onclick="toggleSingleRecord(${comp.id})">
-                                    ${comp.isRecording ? '⏹' : '⏺'}
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="diagnostics" style="border: none; border-radius: var(--radius-sm); margin-top: 4px; padding: 8px 12px;">${comp.errors.join('<br>')}</div>
-                        
-                        <div class="minimal-actions">
-                            <button class="action-btn ${comp.isMounted ? '' : 'warning'}" onclick="toggleMount(${comp.id})">${comp.isMounted ? '⏏ Unmount' : '⬇ Mount'}</button>
-                            <button class="action-btn warning" onclick="eraseDrive(${comp.id})" ${!comp.isMounted || comp.isRecording ? 'disabled' : ''}>Erase</button>
-                            <button class="action-btn danger" onclick="removeComputer(${comp.id})">Remove</button>
-                        </div>
-                    `;
-                }
-                list.appendChild(card);
-            });
-
-            // Master Record Button Sync
-            const recBtn = document.getElementById('globalRecordBtn');
-            const bookmarkContainer = document.getElementById('bookmarkContainer');
-
-            if (isGlobalRecording) {
-                recBtn.classList.add('recording');
-                recBtn.innerHTML = '<span>⏹</span> <span>STOP</span>';
-                bookmarkContainer.classList.add('show');
-            } else {
-                recBtn.classList.remove('recording');
-                recBtn.innerHTML = '<span>⏺</span> <span>Start Session</span>';
-                bookmarkContainer.classList.remove('show');
-            }
+            // BATCH DOM UPDATE
+            list.innerHTML = state.computers.map(comp => state.isDetailed ? getDetailedCard(comp) : getMinimalCard(comp)).join('');
+            
+            // Add new rig button appended after batch insert
+            list.innerHTML += `<button class="action-btn" style="border: 2px dashed var(--border-color); padding: 20px; border-radius: var(--radius-lg); font-size: 14px;" onclick="addRig()">+ Add New Rig</button>`;
         }
 
-        // Card Actions
-        function toggleSingleRecord(id) {
-            const comp = computers.find(c => c.id === id);
-            if (!comp) return;
-            
-            // Show error toast & log it if unable to record
-            if (comp.errors.length > 0) {
-                const ts = getTimestamp();
-                showToast(`[${ts}] ⚠️ Cannot record ${comp.name}`, 'var(--danger-color)', '#ffffff');
-                logError(`[${ts}] ${comp.name}: Failed to start recording (${comp.errors.join(', ')})`);
-                return;
-            }
+        // --- Card Templates ---
+        function getDetailedCard(comp) {
+            const isFull = comp.usage >= 90;
+            const status = comp.errors.length ? 'dot-error' : (comp.rec ? 'dot-rec' : 'dot-ready');
+            return `
+            <div class="card-base ${comp.errors.length ? 'has-error' : ''}">
+                <div class="card-top flex-between">
+                    <div class="flex-row" style="gap:10px"><div class="status-dot ${status}"></div> <b>${comp.name}</b></div>
+                    <button class="btn-card-rec flex-center ${comp.rec ? 'is-recording' : ''}" onclick="toggleRec(${comp.id})">${comp.rec ? '⏹' : '⏺'}</button>
+                </div>
+                <div class="diagnostics">${comp.errors.join('<br>')}</div>
+                <div class="camera-feed flex-center">Feed Offline</div>
+                <div class="card-bottom flex-row">
+                    <div class="drive-info">
+                        <div class="drive-text flex-between"><span>Storage</span><span>${comp.usage}%</span></div>
+                        <div class="progress-bar"><div class="progress-fill ${isFull ? 'full' : ''}" style="width:${comp.usage}%"></div></div>
+                    </div>
+                </div>
+                <div class="action-grid">
+                    <button class="action-btn ${comp.mounted ? '' : 'warning'}" onclick="toggleMount(${comp.id})">${comp.mounted ? '⏏ Unmount' : '⬇ Mount'}</button>
+                    <button class="action-btn warning" onclick="erase(${comp.id})" ${!comp.mounted || comp.rec ? 'disabled' : ''}>Erase</button>
+                    <button class="action-btn danger" onclick="removeRig(${comp.id})">Remove</button>
+                </div>
+            </div>`;
+        }
 
-            comp.isRecording = !comp.isRecording;
-            checkGlobalRecordingValidity();
+        function getMinimalCard(comp) {
+            const isFull = comp.usage >= 90;
+            const status = comp.errors.length ? 'dot-error' : (comp.rec ? 'dot-rec' : 'dot-ready');
+            return `
+            <div class="card-base minimal-card ${comp.errors.length ? 'has-error' : ''}">
+                <div class="flex-between">
+                    <div class="flex-row" style="gap:10px"><div class="status-dot ${status}"></div> <b>${comp.name}</b></div>
+                    <div class="flex-row" style="gap:16px">
+                        <div style="width:60px">
+                            <div class="drive-text flex-between" style="font-size:10px; margin-bottom:4px"><span>${comp.usage}%</span></div>
+                            <div class="progress-bar"><div class="progress-fill ${isFull ? 'full' : ''}" style="width:${comp.usage}%"></div></div>
+                        </div>
+                        <button class="btn-card-rec flex-center ${comp.rec ? 'is-recording' : ''}" style="width:32px; height:32px" onclick="toggleRec(${comp.id})">${comp.rec ? '⏹' : '⏺'}</button>
+                    </div>
+                </div>
+                <div class="diagnostics" style="border:none; border-radius:var(--radius-sm); padding:8px">${comp.errors.join('<br>')}</div>
+                <div class="action-grid minimal-actions">
+                    <button class="action-btn ${comp.mounted ? '' : 'warning'}" onclick="toggleMount(${comp.id})">${comp.mounted ? '⏏ Unmount' : '⬇ Mount'}</button>
+                    <button class="action-btn warning" onclick="erase(${comp.id})" ${!comp.mounted || comp.rec ? 'disabled' : ''}>Erase</button>
+                    <button class="action-btn danger" onclick="removeRig(${comp.id})">Remove</button>
+                </div>
+            </div>`;
+        }
+
+        // --- Core Interactions ---
+        function toggleRec(id) {
+            const c = state.computers.find(x => x.id === id);
+            if (c.errors.length) return logAndToast(`⚠️ Cannot record ${c.name}`, `${c.name} failed rec.`, 'var(--danger-color)');
+            c.rec = !c.rec;
+            state.isRecording = state.computers.some(x => x.rec);
             render();
+        }
 
-            // Recording state toast
-            if (comp.isRecording) {
-                showToast(`⏺ ${comp.name} Recording`, 'var(--danger-color)', '#ffffff');
-            } else {
-                showToast(`⏹ ${comp.name} Paused`, 'var(--warning-color)', '#ffffff');
-            }
+        function toggleGlobalRecord() {
+            state.isRecording = !state.isRecording;
+            let fails = 0;
+            state.computers.forEach(c => {
+                if (state.isRecording && !c.errors.length) c.rec = true;
+                else if (state.isRecording) fails++;
+                else c.rec = false;
+            });
+            render();
+            fails > 0 ? logAndToast(`⏺ Session Started (${fails} failed)`, 'Global rec fail', 'var(--warning-color)') 
+                      : toast(state.isRecording ? '⏺ Session Started' : '⏹ Session Paused');
         }
 
         function toggleMount(id) {
-            const comp = computers.find(c => c.id === id);
-            comp.isMounted = !comp.isMounted;
-            if (!comp.isMounted) {
-                const errStr = `[${getTimestamp()}] Unmounted`;
-                comp.errors = [errStr];
-                comp.isRecording = false; 
-                
-                logError(`${comp.name}: ${errStr}`);
-                showToast(`⏏️ ${comp.name} Unmounted`, 'var(--warning-color)', '#ffffff');
-            } else {
-                comp.errors = [];
-                if (comp.driveUsage >= 90) {
-                    const errStr = `[${getTimestamp()}] Drive Full`;
-                    comp.errors.push(errStr);
-                    logError(`${comp.name}: ${errStr}`);
-                }
-                showToast(`⬇️ ${comp.name} Mounted`, 'var(--success-color)', '#ffffff');
-            }
-            checkGlobalRecordingValidity();
+            const c = state.computers.find(x => x.id === id);
+            c.mounted = !c.mounted;
+            c.rec = false;
+            c.errors = !c.mounted ? [`[${getTS()}] Unmounted`] : (c.usage >= 90 ? [`[${getTS()}] Drive Full`] : []);
             render();
         }
 
-        function eraseDrive(id) {
-            const comp = computers.find(c => c.id === id);
-            if (!comp || !comp.isMounted || comp.isRecording) return;
-            
-            comp.driveUsage = 0; 
-            comp.errors = [];
-            render();
-            showToast(`🧹 ${comp.name} Erased`, 'var(--success-color)', '#ffffff');
+        function erase(id) {
+            const c = state.computers.find(x => x.id === id);
+            if(c) { c.usage = 0; c.errors = []; render(); toast(`🧹 ${c.name} Erased`); }
         }
 
-        function removeComputer(id) {
-            const comp = computers.find(c => c.id === id);
-            const name = comp ? comp.name : 'Rig';
-            computers = computers.filter(c => c.id !== id);
-            checkGlobalRecordingValidity();
-            render();
-            showToast(`🗑️ ${name} Removed`);
+        function removeRig(id) { state.computers = state.computers.filter(x => x.id !== id); render(); }
+        function addRig() { state.computers.push({ id: ++state.idCounter, name: `Rig ${state.idCounter}`, mounted: true, usage: 0, rec: state.isRecording, errors: [] }); render(); }
+        function toggleView() { state.isDetailed = !state.isDetailed; render(); }
+        function toggleTheme() {
+            state.theme = state.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', state.theme);
+            document.getElementById('themeToggleBtn').innerText = state.theme === 'dark' ? '☀️' : '🌙';
         }
 
-        // Global Actions
-        function toggleView() { isDetailedView = !isDetailedView; render(); }
-
-        function toggleGlobalRecord() {
-            isGlobalRecording = !isGlobalRecording;
-            let errorCount = 0;
-
-            computers.forEach(comp => {
-                if (isGlobalRecording) {
-                    if (comp.errors.length === 0) {
-                        comp.isRecording = true;
-                    } else {
-                        errorCount++;
-                    }
-                } else {
-                    comp.isRecording = false;
-                }
-            });
-            render();
-
-            if (isGlobalRecording) {
-                if (errorCount > 0) {
-                    const ts = getTimestamp();
-                    showToast(`[${ts}] ⏺ Session Started (${errorCount} rigs failed)`, 'var(--warning-color)', '#ffffff');
-                    logError(`[${ts}] Global session started, but ${errorCount} rig(s) failed to record.`);
-                } else {
-                    showToast('⏺ Session Recording Started', 'var(--danger-color)', '#ffffff');
-                }
-            } else {
-                showToast('⏹ Session Paused', 'var(--warning-color)', '#ffffff');
-            }
+        // --- Helpers ---
+        function updateUI() {
+            const btn = document.getElementById('globalRecordBtn');
+            btn.className = `btn-record-all flex-center ${state.isRecording ? 'recording' : ''}`;
+            btn.innerHTML = `<span style="margin-right:8px">${state.isRecording ? '⏹' : '⏺'}</span> ${state.isRecording ? 'STOP' : 'Start Session'}`;
         }
 
-        function checkGlobalRecordingValidity() {
-            isGlobalRecording = computers.some(c => c.isRecording);
+        let toastTimer;
+        function toast(msg, color = 'var(--text-primary)') {
+            const el = document.getElementById('toast');
+            el.innerText = msg; el.style.color = color; el.classList.add('show');
+            clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
         }
 
-        // Metadata 
-        function openMetadataModal() { 
-            renderModalOperators();
-            document.getElementById('metadataModal').classList.add('active'); 
-        }
-        
-        function closeMetadataModal() { document.getElementById('metadataModal').classList.remove('active'); }
-        
-        function applyPresetFromDropdown(val) {
-            if(val === 'none') { activeSchemaId = null; return; }
-            activeSchemaId = val;
-            const s = schemas.find(x => x.id === val);
-            document.getElementById('metaLoc').value = s.tags.loc;
-            document.getElementById('metaEq').value = s.tags.eq;
+        function logAndToast(toastMsg, logMsg, color) {
+            state.logs.push(`[${getTS()}] ${logMsg}`);
+            toast(toastMsg, color);
+            const logBox = document.getElementById('errorLogContainer');
+            if(logBox) logBox.innerHTML = state.logs.join('<br>');
         }
 
-        function addOperator() {
-            const name = document.getElementById('rosterInput').value.trim();
-            const role = document.getElementById('roleSelect').value;
-            if (!name) return;
-            
-            const str = `${name} (${role})`;
-            if (!tempOperators.includes(str)) {
-                tempOperators.push(str);
-                document.getElementById('rosterInput').value = ''; 
-                renderModalOperators();
-            }
+        // Modals
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function copyErrorLog() {
+            const text = state.logs.join('\n');
+            const ta = document.createElement("textarea"); ta.value = text;
+            ta.style.position = "fixed"; document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy') ? toast('📋 Copied') : toast('❌ Failed'); } catch(e) {}
+            document.body.removeChild(ta); closeModal('errorLogModal');
         }
 
-        function removeOperator(index) {
-            tempOperators.splice(index, 1);
-            renderModalOperators();
-        }
-
-        function renderModalOperators() {
-            const container = document.getElementById('selectedOperators');
-            container.innerHTML = '';
-            tempOperators.forEach((op, index) => {
-                const tag = document.createElement('div');
-                tag.className = 'op-tag';
-                tag.innerHTML = `${op} <span onclick="removeOperator(${index})">&times;</span>`;
-                container.appendChild(tag);
-            });
-        }
-
-        function saveCustomMetadata() {
-            currentMetadataObj = {
-                loc: document.getElementById('metaLoc').value,
-                eq: document.getElementById('metaEq').value,
-                ops: [...tempOperators]
-            };
-            const presetVal = document.getElementById('presetSelect').value;
-            if(presetVal === 'none') activeSchemaId = null;
-            
-            closeMetadataModal();
-            render();
-            
-            // Show toast on successful metadata save
-            showToast('✅ Metadata Applied', 'var(--success-color)', '#ffffff');
-        }
-
-        // Add Rig using Autofill Input
-        function openAddRigModal() { 
-            document.getElementById('rigNameInput').value = ''; 
-            document.getElementById('addRigModal').classList.add('active'); 
-        }
-        
-        function closeAddRigModal() { document.getElementById('addRigModal').classList.remove('active'); }
-        
-        function confirmAddRig() {
-            const inputVal = document.getElementById('rigNameInput').value.trim();
-            const finalName = inputVal !== '' ? inputVal : `Camera Rig ${computerIdCounter + 1}`;
-
-            computers.push({
-                id: ++computerIdCounter, 
-                name: finalName,
-                isMounted: true, 
-                driveUsage: Math.floor(Math.random() * 80), 
-                isRecording: isGlobalRecording, 
-                errors: []
-            });
-            closeAddRigModal();
-            render();
-
-            // Show toast on newly added rig
-            showToast(`📸 ${finalName} Added`, 'var(--primary-color)', '#ffffff');
-        }
-
+        // Init
         render();
     </script>
 </body>
