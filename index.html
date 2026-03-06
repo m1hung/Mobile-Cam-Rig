@@ -77,9 +77,17 @@
         .modal-overlay { position: fixed; inset: 0; background: var(--modal-bg); z-index: 1000; display: none; padding: 20px; align-items: center; justify-content: center; }
         .modal-overlay.active { display: flex; }
         .modal-content { background: var(--surface-color); padding: 24px; border-radius: var(--radius-lg); width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 16px; }
+        .modal-content h3 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+        .modal-content label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: -10px; }
         .modal-input { width: 100%; padding: 12px; background: var(--surface-elevated); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: var(--radius-sm); font-size: 14px; outline: none; }
+        input::-webkit-calendar-picker-indicator { color: var(--text-secondary); opacity: 1; cursor: pointer; }
         .error-log-container { max-height: 200px; overflow-y: auto; background: var(--surface-elevated); padding: 12px; border-radius: var(--radius-sm); font-family: monospace; font-size: 12px; color: var(--warning-color); white-space: pre-wrap; border: 1px solid var(--border-color); user-select: text; }
 
+        .operator-inputs { display: flex; gap: 8px; margin-bottom: 4px; }
+        .operator-inputs input, .operator-inputs select { flex: 1; min-width: 0; }
+        .operator-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: -5px; }
+        .op-tag { background: rgba(74, 111, 165, 0.15); color: var(--primary-color); border: 1px solid rgba(74, 111, 165, 0.3); padding: 6px 12px; border-radius: 14px; font-size: 12px; display: flex; align-items: center; gap: 8px; }
+        
         /* Bottom Bar */
         .bottom-action-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--header-bg); backdrop-filter: blur(16px); border-top: 1px solid var(--border-color); padding: 12px 20px calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 100; }
         .btn-record-all { height: 50px; flex: 1; border-radius: var(--radius-md); background: var(--success-color); color: #fff; border: none; font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.2s; }
@@ -118,6 +126,7 @@
     <div id="toast" class="toast"></div>
 
     <div id="modalContainer">
+        
         <div class="modal-overlay" id="errorLogModal">
             <div class="modal-content">
                 <h3 style="margin-bottom:0">System Error Log</h3>
@@ -128,6 +137,80 @@
                 </div>
             </div>
         </div>
+
+        <div class="modal-overlay" id="addRigModal">
+            <div class="modal-content">
+                <h3>Add Camera Rig</h3>
+                <label>Rig Name</label>
+                <input type="text" id="rigNameInput" class="modal-input" list="rigOptionsList" placeholder="Type name or select preset...">
+                <datalist id="rigOptionsList">
+                    <option value="Cam-Rig Alpha">
+                    <option value="Cam-Rig Beta">
+                    <option value="Cam-Rig Gamma">
+                    <option value="Drone Cam 1">
+                    <option value="Steadicam 1">
+                    <option value="Crash Cam">
+                </datalist>
+                <div class="flex-row" style="gap:10px; margin-top:8px">
+                    <button class="action-btn" style="flex:1" onclick="closeModal('addRigModal')">Cancel</button>
+                    <button class="action-btn" style="flex:1; background:var(--primary-color); color:#fff" onclick="confirmAddRig()">Add Rig</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="ticketModal">
+            <div class="modal-content">
+                <h3>Report Issue</h3>
+                <label>Issue Type</label>
+                <select id="ticketType" class="modal-input">
+                    <option value="Faulty Equipment">Faulty Equipment</option>
+                    <option value="Connectivity">Connectivity Issue</option>
+                    <option value="Software Glitch">Software Glitch</option>
+                </select>
+                <label>Affected Rig</label>
+                <select id="ticketRigSelect" class="modal-input"></select>
+                <label>Description</label>
+                <textarea id="ticketDescription" class="modal-input" style="min-height: 80px; resize: vertical;" placeholder="Details..."></textarea>
+                <div class="flex-row" style="gap:10px; margin-top:8px">
+                    <button class="action-btn" style="flex:1" onclick="closeModal('ticketModal')">Cancel</button>
+                    <button class="action-btn" style="flex:1; background:var(--warning-color); color:#fff" onclick="submitTicket()">Submit</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="metadataModal">
+            <div class="modal-content">
+                <h3>Session Metadata</h3>
+                <label>Quick Preset</label>
+                <select id="presetSelect" class="modal-input" onchange="applyPreset(this.value)">
+                    <option value="none">Custom / None</option>
+                    <option value="1">Studio Setup</option>
+                    <option value="2">Field Action</option>
+                </select>
+
+                <label>Location & Equipment</label>
+                <div class="operator-inputs">
+                    <select id="metaLoc" class="modal-input"><option value="Studio A">Studio A</option><option value="Ext. City">Ext. City</option></select>
+                    <select id="metaEq" class="modal-input"><option value="ARRI Alexa">ARRI Alexa</option><option value="RED Komodo">RED Komodo</option></select>
+                </div>
+                
+                <label>Add Crew</label>
+                <div class="operator-inputs">
+                    <input type="text" id="rosterInput" class="modal-input" placeholder="Name...">
+                    <select id="roleSelect" class="modal-input" style="flex: 0.6;">
+                        <option value="Operator">Op</option><option value="1st AC">1st AC</option>
+                    </select>
+                </div>
+                <button class="action-btn" onclick="addOperator()">+ Add to Session</button>
+                <div class="operator-tags" id="selectedOperators"></div>
+
+                <div class="flex-row" style="gap:10px; margin-top:8px">
+                    <button class="action-btn" style="flex:1" onclick="closeModal('metadataModal')">Cancel</button>
+                    <button class="action-btn" style="flex:1; background:var(--primary-color); color:#fff" onclick="saveMetadata()">Apply</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -138,12 +221,18 @@
             theme: 'dark',
             schema: null,
             logs: [],
+            tempOps: [],
             idCounter: 3,
             computers: [
                 { id: 1, name: "Cam-Rig Alpha", mounted: true, usage: 95, rec: false, errors: [] },
                 { id: 2, name: "Cam-Rig Beta", mounted: false, usage: 42, rec: false, errors: [] },
             ]
         };
+
+        const schemas = [
+            { id: '1', label: "Studio Setup", tags: { loc: "Studio A", eq: "ARRI Alexa" } },
+            { id: '2', label: "Field Action", tags: { loc: "Ext. City", eq: "RED Komodo" } }
+        ];
 
         // Utility: Timestamps
         const getTS = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -161,11 +250,11 @@
 
         function renderList() {
             const list = document.getElementById('computerList');
-            // BATCH DOM UPDATE
+            // BATCH DOM UPDATE: Huge performance boost over appending in a loop
             list.innerHTML = state.computers.map(comp => state.isDetailed ? getDetailedCard(comp) : getMinimalCard(comp)).join('');
             
-            // Add new rig button appended after batch insert
-            list.innerHTML += `<button class="action-btn" style="border: 2px dashed var(--border-color); padding: 20px; border-radius: var(--radius-lg); font-size: 14px;" onclick="addRig()">+ Add New Rig</button>`;
+            // Note: Now calls openModal instead of bypassing the modal
+            list.innerHTML += `<button class="action-btn" style="border: 2px dashed var(--border-color); padding: 20px; border-radius: var(--radius-lg); font-size: 14px;" onclick="openModal('addRigModal')">+ Add New Rig</button>`;
         }
 
         // --- Card Templates ---
@@ -254,7 +343,18 @@
         }
 
         function removeRig(id) { state.computers = state.computers.filter(x => x.id !== id); render(); }
-        function addRig() { state.computers.push({ id: ++state.idCounter, name: `Rig ${state.idCounter}`, mounted: true, usage: 0, rec: state.isRecording, errors: [] }); render(); }
+        
+        function confirmAddRig() {
+            const inputVal = document.getElementById('rigNameInput').value.trim();
+            const finalName = inputVal !== '' ? inputVal : `Camera Rig ${state.idCounter + 1}`;
+            state.computers.push({ id: ++state.idCounter, name: finalName, mounted: true, usage: Math.floor(Math.random() * 80), rec: state.isRecording, errors: [] });
+            
+            document.getElementById('rigNameInput').value = '';
+            closeModal('addRigModal');
+            render();
+            toast(`📸 ${finalName} Added`);
+        }
+
         function toggleView() { state.isDetailed = !state.isDetailed; render(); }
         function toggleTheme() {
             state.theme = state.theme === 'dark' ? 'light' : 'dark';
@@ -262,11 +362,14 @@
             document.getElementById('themeToggleBtn').innerText = state.theme === 'dark' ? '☀️' : '🌙';
         }
 
-        // --- Helpers ---
+        // --- Helpers & Modals ---
         function updateUI() {
             const btn = document.getElementById('globalRecordBtn');
             btn.className = `btn-record-all flex-center ${state.isRecording ? 'recording' : ''}`;
             btn.innerHTML = `<span style="margin-right:8px">${state.isRecording ? '⏹' : '⏺'}</span> ${state.isRecording ? 'STOP' : 'Start Session'}`;
+            
+            const metaBtn = document.getElementById('metaSummaryBtn');
+            metaBtn.innerText = state.schema ? `🏷️ Schema: ${state.schema}` : '🏷️ Schema: None';
         }
 
         let toastTimer;
@@ -283,15 +386,54 @@
             if(logBox) logBox.innerHTML = state.logs.join('<br>');
         }
 
-        // Modals
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function openModal(id) { 
+            if(id === 'ticketModal') {
+                const rigSelect = document.getElementById('ticketRigSelect');
+                rigSelect.innerHTML = '<option value="General">General / All Rigs</option>' + state.computers.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            }
+            document.getElementById(id).classList.add('active'); 
+        }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        
         function copyErrorLog() {
-            const text = state.logs.join('\n');
-            const ta = document.createElement("textarea"); ta.value = text;
+            if(!state.logs.length) return toast('⚠️ No logs to copy');
+            const ta = document.createElement("textarea"); ta.value = state.logs.join('\n');
             ta.style.position = "fixed"; document.body.appendChild(ta); ta.select();
             try { document.execCommand('copy') ? toast('📋 Copied') : toast('❌ Failed'); } catch(e) {}
             document.body.removeChild(ta); closeModal('errorLogModal');
+        }
+
+        function submitTicket() { closeModal('ticketModal'); toast('🎟️ Ticket Submitted'); }
+        
+        function applyPreset(val) {
+            if(val === 'none') return;
+            const s = schemas.find(x => x.id === val);
+            document.getElementById('metaLoc').value = s.tags.loc;
+            document.getElementById('metaEq').value = s.tags.eq;
+        }
+
+        function addOperator() {
+            const name = document.getElementById('rosterInput').value.trim();
+            const role = document.getElementById('roleSelect').value;
+            if (!name) return;
+            state.tempOps.push(`${name} (${role})`);
+            document.getElementById('rosterInput').value = '';
+            renderOps();
+        }
+
+        function removeOp(index) { state.tempOps.splice(index, 1); renderOps(); }
+        function renderOps() {
+            document.getElementById('selectedOperators').innerHTML = state.tempOps.map((op, i) => 
+                `<div class="op-tag">${op} <span style="cursor:pointer" onclick="removeOp(${i})">&times;</span></div>`
+            ).join('');
+        }
+
+        function saveMetadata() {
+            const p = document.getElementById('presetSelect').value;
+            state.schema = p !== 'none' ? schemas.find(x => x.id === p).label : 'Custom';
+            closeModal('metadataModal');
+            render();
+            toast('✅ Metadata Applied');
         }
 
         // Init
