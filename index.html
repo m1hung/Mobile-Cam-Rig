@@ -28,12 +28,15 @@
         .flex-row { display: flex; align-items: center; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
         .flex-center { display: flex; align-items: center; justify-content: center; }
+        .icn { width: 1.2em; height: 1.2em; flex-shrink: 0; stroke-width: 2; }
+        .icn-sm { width: 1em; height: 1em; }
         
         /* Header & Dash */
         header { position: sticky; top: 0; background: var(--header-bg); backdrop-filter: blur(16px); padding: calc(12px + env(safe-area-inset-top, 0px)) 20px 12px; z-index: 100; border-bottom: 1px solid var(--border-color); }
-        .app-logo { height: 26px; border-radius: 6px; }
+        .app-logo { height: 26px; border-radius: 6px; transition: 0.2s; }
+        .app-logo.hidden { display: none; }
         header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; margin: 0; }
-        .icon-btn { background: var(--surface-elevated); border: 1px solid var(--border-color); height: 36px; width: 36px; border-radius: 50%; font-size: 14px; cursor: pointer; color: var(--text-primary); transition: 0.2s; }
+        .icon-btn { background: var(--surface-elevated); border: 1px solid var(--border-color); height: 36px; width: 36px; border-radius: 50%; cursor: pointer; color: var(--text-primary); transition: 0.2s; }
         .icon-btn:hover { background: var(--border-color); }
         .dashboard-header { padding: 20px 20px 10px; gap: 12px; }
         .pill-btn { background: var(--surface-color); border: 1px solid var(--border-color); padding: 10px 16px; border-radius: 30px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-primary); }
@@ -52,7 +55,7 @@
         .progress-fill.full { background: var(--danger-color); }
         
         /* Buttons */
-        .btn-card-rec { background: var(--surface-elevated); border: 1px solid var(--border-color); color: var(--success-color); height: 36px; width: 36px; border-radius: 50%; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .btn-card-rec { background: var(--surface-elevated); border: 1px solid var(--border-color); color: var(--success-color); height: 36px; width: 36px; border-radius: 50%; cursor: pointer; transition: 0.2s; }
         .btn-card-rec.is-recording { background: var(--danger-color); border-color: var(--danger-color); color: #fff; }
         .action-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 16px 16px; }
         .action-btn { background: var(--surface-elevated); color: var(--text-primary); border: 1px solid transparent; padding: 10px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
@@ -94,33 +97,47 @@
         .btn-record-all.recording { background: var(--danger-color); }
         .toast { position: fixed; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--surface-elevated); color: var(--text-primary); border: 1px solid var(--border-color); padding: 12px 24px; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 1000; }
         .toast.show { opacity: 1; }
+        
+        /* Bookmarks */
+        .bookmark-container { display: none; align-items: center; gap: 8px; overflow-x: auto; scrollbar-width: none; white-space: nowrap; width: calc(100% - 142px); }
+        .bookmark-container::-webkit-scrollbar { display: none; }
+        .bookmark-container.show { display: flex; }
+        .btn-bookmark-preset { background: var(--surface-elevated); border: 1px solid var(--border-color); color: var(--text-primary); padding: 0 16px; height: 40px; border-radius: var(--radius-sm); font-weight: 500; font-size: 13px; cursor: pointer; flex-shrink: 0; transition: 0.2s; }
+        .btn-bookmark-preset:hover { background: var(--border-color); }
     </style>
 </head>
 <body>
 
     <header class="flex-between">
         <div class="flex-row" style="gap: 12px;">
-            <svg id="appLogo" class="app-logo" xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='#4a6fa5' rx='10'/><circle cx='50' cy='50' r='25' fill='white'/></svg>
+            <svg id="appLogo" class="app-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <rect width="100" height="100" fill="#4a6fa5" rx="18"/>
+                <path d="M32 36 l6-10 h24 l6 10 z" fill="#ffffff"/>
+                <rect x="16" y="36" width="68" height="46" rx="8" fill="#ffffff"/>
+                <circle cx="50" cy="59" r="16" fill="#4a6fa5"/>
+                <circle cx="50" cy="59" r="8" fill="#ffffff"/>
+                <circle cx="74" cy="46" r="4" fill="#b34d4d"/>
+            </svg>
             <h1>Session Control</h1>
         </div>
         <div class="flex-row" style="gap: 12px;">
-            <button class="icon-btn flex-center" onclick="openModal('errorLogModal')">📋</button>
-            <button class="icon-btn flex-center" onclick="openModal('ticketModal')">🎫</button>
-            <button class="icon-btn flex-center" onclick="toggleTheme()" id="themeToggleBtn">☀️</button>
+            <button class="icon-btn flex-center" id="btnLog" onclick="openModal('errorLogModal')" title="System Error Log"></button>
+            <button class="icon-btn flex-center" id="btnTicket" onclick="openModal('ticketModal')" title="Report Issue"></button>
+            <button class="icon-btn flex-center" id="btnLogo" onclick="toggleLogo()" title="Toggle Logo"></button>
+            <button class="icon-btn flex-center" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme"></button>
         </div>
     </header>
 
     <div class="dashboard-header flex-between">
-        <button class="pill-btn flex-row" style="flex:1; color:var(--primary-color)" onclick="openModal('metadataModal')" id="metaSummaryBtn">🏷️ Schema: None</button>
-        <button class="pill-btn flex-center" onclick="toggleView()">≡</button>
+        <button class="pill-btn flex-row" style="flex:1; color:var(--primary-color); gap: 6px;" onclick="openModal('metadataModal')" id="metaSummaryBtn"></button>
+        <button class="pill-btn flex-center" id="viewToggleBtn" onclick="toggleView()"></button>
     </div>
 
     <div class="computer-list" id="computerList"></div>
 
     <div class="bottom-action-bar flex-row" style="gap:12px">
-        <button class="btn-record-all flex-center" id="globalRecordBtn" onclick="toggleGlobalRecord()">
-            <span style="margin-right:8px">⏺</span> <span id="recordText">Start Session</span>
-        </button>
+        <div class="bookmark-container" id="bookmarkContainer"></div>
+        <button class="btn-record-all flex-center" style="gap:8px;" id="globalRecordBtn" onclick="toggleGlobalRecord()"></button>
     </div>
 
     <div id="toast" class="toast"></div>
@@ -133,7 +150,7 @@
                 <div class="error-log-container" id="errorLogContainer"></div>
                 <div class="flex-row" style="gap:10px; margin-top:8px">
                     <button class="action-btn" style="flex:1" onclick="closeModal('errorLogModal')">Close</button>
-                    <button class="action-btn" style="flex:1; background:var(--primary-color); color:#fff" onclick="copyErrorLog()">Copy</button>
+                    <button class="action-btn flex-row flex-center" style="flex:1; gap:6px; background:var(--primary-color); color:#fff" id="btnCopyLog" onclick="copyErrorLog()">Copy</button>
                 </div>
             </div>
         </div>
@@ -153,7 +170,7 @@
                 </datalist>
                 <div class="flex-row" style="gap:10px; margin-top:8px">
                     <button class="action-btn" style="flex:1" onclick="closeModal('addRigModal')">Cancel</button>
-                    <button class="action-btn" style="flex:1; background:var(--primary-color); color:#fff" onclick="confirmAddRig()">Add Rig</button>
+                    <button class="action-btn flex-row flex-center" style="flex:1; gap:6px; background:var(--primary-color); color:#fff" id="btnConfirmAdd" onclick="confirmAddRig()">Add Rig</button>
                 </div>
             </div>
         </div>
@@ -201,7 +218,7 @@
                         <option value="Operator">Op</option><option value="1st AC">1st AC</option>
                     </select>
                 </div>
-                <button class="action-btn" onclick="addOperator()">+ Add to Session</button>
+                <button class="action-btn flex-row flex-center" style="gap:6px;" id="btnAddOp" onclick="addOperator()">Add to Session</button>
                 <div class="operator-tags" id="selectedOperators"></div>
 
                 <div class="flex-row" style="gap:10px; margin-top:8px">
@@ -214,10 +231,37 @@
     </div>
 
     <script>
+        // --- Uniform SVG Icon Library ---
+        const icons = {
+            log: `<svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>`,
+            ticket: `<svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path><line x1="9" y1="12" x2="15" y2="12"></line></svg>`,
+            image: `<svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`,
+            sun: `<svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`,
+            moon: `<svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
+            tag: `<svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>`,
+            grid: `<svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>`,
+            list: `<svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`,
+            rec: `<svg class="icn icn-sm" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"></circle></svg>`,
+            stop: `<svg class="icn icn-sm" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>`,
+            mount: `<svg class="icn icn-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`,
+            unmount: `<svg class="icn icn-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15l7-7 7 7"></path><line x1="5" y1="21" x2="19" y2="21"></line></svg>`,
+            erase: `<svg class="icn icn-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-5V8a4 4 0 0 0-8 0v0H3V2h18.5z"></path><path d="M17 8v14"></path><path d="M12 10v12"></path><path d="M7 8v14"></path></svg>`,
+            trash: `<svg class="icn icn-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+            plus: `<svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+            star: `<svg class="icn icn-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`,
+            x: `<svg class="icn icn-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+            zap: `<svg class="icn icn-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
+            alert: `<svg class="icn icn-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86l-8.59 14.8c-.8.8-.2 2.14 1.29 2.14h17.1c1.5 0 2.1-1.34 1.29-2.14L13.71 3.86a1.5 1.5 0 0 0-2.86 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+            check: `<svg class="icn icn-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`,
+            camera: `<svg class="icn icn-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>`,
+            bookmark: `<svg class="icn icn-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`
+        };
+
         // Data & State
         let state = {
             isRecording: false,
             isDetailed: true,
+            isLogoVisible: true,
             theme: 'dark',
             schema: null,
             logs: [],
@@ -226,6 +270,11 @@
             computers: [
                 { id: 1, name: "Cam-Rig Alpha", mounted: true, usage: 95, rec: false, errors: [] },
                 { id: 2, name: "Cam-Rig Beta", mounted: false, usage: 42, rec: false, errors: [] },
+            ],
+            bookmarks: [
+                { id: 'good', icon: 'star', label: 'Good Take' },
+                { id: 'false', icon: 'x', label: 'False Start' },
+                { id: 'action', icon: 'zap', label: 'Action Mark' }
             ]
         };
 
@@ -253,8 +302,8 @@
             // BATCH DOM UPDATE: Huge performance boost over appending in a loop
             list.innerHTML = state.computers.map(comp => state.isDetailed ? getDetailedCard(comp) : getMinimalCard(comp)).join('');
             
-            // Note: Now calls openModal instead of bypassing the modal
-            list.innerHTML += `<button class="action-btn" style="border: 2px dashed var(--border-color); padding: 20px; border-radius: var(--radius-lg); font-size: 14px;" onclick="openModal('addRigModal')">+ Add New Rig</button>`;
+            // Add new rig button appended after batch insert
+            list.innerHTML += `<button class="action-btn flex-row flex-center" style="border: 2px dashed var(--border-color); padding: 20px; border-radius: var(--radius-lg); font-size: 14px; gap:8px;" onclick="openModal('addRigModal')">${icons.plus} Add New Rig</button>`;
         }
 
         // --- Card Templates ---
@@ -265,7 +314,7 @@
             <div class="card-base ${comp.errors.length ? 'has-error' : ''}">
                 <div class="card-top flex-between">
                     <div class="flex-row" style="gap:10px"><div class="status-dot ${status}"></div> <b>${comp.name}</b></div>
-                    <button class="btn-card-rec flex-center ${comp.rec ? 'is-recording' : ''}" onclick="toggleRec(${comp.id})">${comp.rec ? '⏹' : '⏺'}</button>
+                    <button class="btn-card-rec flex-center ${comp.rec ? 'is-recording' : ''}" onclick="toggleRec(${comp.id})">${comp.rec ? icons.stop : icons.rec}</button>
                 </div>
                 <div class="diagnostics">${comp.errors.join('<br>')}</div>
                 <div class="camera-feed flex-center">Feed Offline</div>
@@ -276,9 +325,9 @@
                     </div>
                 </div>
                 <div class="action-grid">
-                    <button class="action-btn ${comp.mounted ? '' : 'warning'}" onclick="toggleMount(${comp.id})">${comp.mounted ? '⏏ Unmount' : '⬇ Mount'}</button>
-                    <button class="action-btn warning" onclick="erase(${comp.id})" ${!comp.mounted || comp.rec ? 'disabled' : ''}>Erase</button>
-                    <button class="action-btn danger" onclick="removeRig(${comp.id})">Remove</button>
+                    <button class="action-btn flex-row flex-center ${comp.mounted ? '' : 'warning'}" style="gap:6px;" onclick="toggleMount(${comp.id})">${comp.mounted ? icons.unmount + ' Unmount' : icons.mount + ' Mount'}</button>
+                    <button class="action-btn warning flex-row flex-center" style="gap:6px;" onclick="erase(${comp.id})" ${!comp.mounted || comp.rec ? 'disabled' : ''}>${icons.erase} Erase</button>
+                    <button class="action-btn danger flex-row flex-center" style="gap:6px;" onclick="removeRig(${comp.id})">${icons.trash} Remove</button>
                 </div>
             </div>`;
         }
@@ -295,14 +344,14 @@
                             <div class="drive-text flex-between" style="font-size:10px; margin-bottom:4px"><span>${comp.usage}%</span></div>
                             <div class="progress-bar"><div class="progress-fill ${isFull ? 'full' : ''}" style="width:${comp.usage}%"></div></div>
                         </div>
-                        <button class="btn-card-rec flex-center ${comp.rec ? 'is-recording' : ''}" style="width:32px; height:32px" onclick="toggleRec(${comp.id})">${comp.rec ? '⏹' : '⏺'}</button>
+                        <button class="btn-card-rec flex-center ${comp.rec ? 'is-recording' : ''}" style="width:32px; height:32px" onclick="toggleRec(${comp.id})">${comp.rec ? icons.stop : icons.rec}</button>
                     </div>
                 </div>
                 <div class="diagnostics" style="border:none; border-radius:var(--radius-sm); padding:8px">${comp.errors.join('<br>')}</div>
                 <div class="action-grid minimal-actions">
-                    <button class="action-btn ${comp.mounted ? '' : 'warning'}" onclick="toggleMount(${comp.id})">${comp.mounted ? '⏏ Unmount' : '⬇ Mount'}</button>
-                    <button class="action-btn warning" onclick="erase(${comp.id})" ${!comp.mounted || comp.rec ? 'disabled' : ''}>Erase</button>
-                    <button class="action-btn danger" onclick="removeRig(${comp.id})">Remove</button>
+                    <button class="action-btn flex-row flex-center ${comp.mounted ? '' : 'warning'}" style="gap:6px;" onclick="toggleMount(${comp.id})">${comp.mounted ? icons.unmount + ' Unmount' : icons.mount + ' Mount'}</button>
+                    <button class="action-btn warning flex-row flex-center" style="gap:6px;" onclick="erase(${comp.id})" ${!comp.mounted || comp.rec ? 'disabled' : ''}>${icons.erase} Erase</button>
+                    <button class="action-btn danger flex-row flex-center" style="gap:6px;" onclick="removeRig(${comp.id})">${icons.trash} Remove</button>
                 </div>
             </div>`;
         }
@@ -310,10 +359,11 @@
         // --- Core Interactions ---
         function toggleRec(id) {
             const c = state.computers.find(x => x.id === id);
-            if (c.errors.length) return logAndToast(`⚠️ Cannot record ${c.name}`, `${c.name} failed rec.`, 'var(--danger-color)');
+            if (c.errors.length) return logAndToast(icons.alert, `Cannot record ${c.name}`, `${c.name} failed rec.`, 'var(--danger-color)');
             c.rec = !c.rec;
             state.isRecording = state.computers.some(x => x.rec);
             render();
+            toast(c.rec ? icons.rec : icons.stop, `${c.name} ${c.rec ? 'Recording' : 'Paused'}`, c.rec ? 'var(--danger-color)' : 'var(--warning-color)');
         }
 
         function toggleGlobalRecord() {
@@ -325,8 +375,8 @@
                 else c.rec = false;
             });
             render();
-            fails > 0 ? logAndToast(`⏺ Session Started (${fails} failed)`, 'Global rec fail', 'var(--warning-color)') 
-                      : toast(state.isRecording ? '⏺ Session Started' : '⏹ Session Paused');
+            fails > 0 ? logAndToast(icons.alert, `Session Started (${fails} failed)`, 'Global rec fail', 'var(--warning-color)') 
+                      : toast(state.isRecording ? icons.rec : icons.stop, state.isRecording ? 'Session Started' : 'Session Paused');
         }
 
         function toggleMount(id) {
@@ -335,14 +385,20 @@
             c.rec = false;
             c.errors = !c.mounted ? [`[${getTS()}] Unmounted`] : (c.usage >= 90 ? [`[${getTS()}] Drive Full`] : []);
             render();
+            toast(c.mounted ? icons.mount : icons.unmount, `${c.name} ${c.mounted ? 'Mounted' : 'Unmounted'}`, c.mounted ? 'var(--success-color)' : 'var(--warning-color)');
         }
 
         function erase(id) {
             const c = state.computers.find(x => x.id === id);
-            if(c) { c.usage = 0; c.errors = []; render(); toast(`🧹 ${c.name} Erased`); }
+            if(c) { c.usage = 0; c.errors = []; render(); toast(icons.erase, `${c.name} Erased`, 'var(--success-color)'); }
         }
 
-        function removeRig(id) { state.computers = state.computers.filter(x => x.id !== id); render(); }
+        function removeRig(id) { 
+            const c = state.computers.find(x => x.id === id);
+            state.computers = state.computers.filter(x => x.id !== id); 
+            render(); 
+            toast(icons.trash, `${c ? c.name : 'Rig'} Removed`);
+        }
         
         function confirmAddRig() {
             const inputVal = document.getElementById('rigNameInput').value.trim();
@@ -352,36 +408,66 @@
             document.getElementById('rigNameInput').value = '';
             closeModal('addRigModal');
             render();
-            toast(`📸 ${finalName} Added`);
+            toast(icons.camera, `${finalName} Added`, 'var(--primary-color)');
         }
 
         function toggleView() { state.isDetailed = !state.isDetailed; render(); }
         function toggleTheme() {
             state.theme = state.theme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', state.theme);
-            document.getElementById('themeToggleBtn').innerText = state.theme === 'dark' ? '☀️' : '🌙';
+            updateUI();
+        }
+        function toggleLogo() {
+            state.isLogoVisible = !state.isLogoVisible;
+            const logo = document.getElementById('appLogo');
+            state.isLogoVisible ? logo.classList.remove('hidden') : logo.classList.add('hidden');
         }
 
         // --- Helpers & Modals ---
         function updateUI() {
+            // Apply static icons on first pass
+            if(!document.getElementById('btnLog').innerHTML) {
+                document.getElementById('btnLog').innerHTML = icons.log;
+                document.getElementById('btnTicket').innerHTML = icons.ticket;
+                document.getElementById('btnLogo').innerHTML = icons.image;
+                document.getElementById('btnCopyLog').innerHTML = icons.clipboard + ' Copy';
+                document.getElementById('btnConfirmAdd').innerHTML = icons.plus + ' Add Rig';
+                document.getElementById('btnAddOp').innerHTML = icons.plus + ' Add to Session';
+                
+                // Inject Bookmarks
+                document.getElementById('bookmarkContainer').innerHTML = state.bookmarks.map(b => 
+                    `<button class="btn-bookmark-preset flex-row" style="gap:6px;" onclick="dropBookmark('${b.label}', '${b.icon}')">${icons[b.icon]} ${b.label}</button>`
+                ).join('');
+            }
+            
+            // Dynamic Header Updates
+            document.getElementById('themeToggleBtn').innerHTML = state.theme === 'dark' ? icons.sun : icons.moon;
+            document.getElementById('viewToggleBtn').innerHTML = state.isDetailed ? icons.list : icons.grid;
+
+            // Global Record Update
             const btn = document.getElementById('globalRecordBtn');
             btn.className = `btn-record-all flex-center ${state.isRecording ? 'recording' : ''}`;
-            btn.innerHTML = `<span style="margin-right:8px">${state.isRecording ? '⏹' : '⏺'}</span> ${state.isRecording ? 'STOP' : 'Start Session'}`;
+            btn.innerHTML = `${state.isRecording ? icons.stop : icons.rec} ${state.isRecording ? 'STOP' : 'Start Session'}`;
             
+            // Meta Button Update
             const metaBtn = document.getElementById('metaSummaryBtn');
-            metaBtn.innerText = state.schema ? `🏷️ Schema: ${state.schema}` : '🏷️ Schema: None';
+            metaBtn.innerHTML = `${icons.tag} Schema: ${state.schema ? state.schema : 'None'}`;
         }
 
         let toastTimer;
-        function toast(msg, color = 'var(--text-primary)') {
+        function toast(iconSvg, msg, color = 'var(--text-primary)') {
             const el = document.getElementById('toast');
-            el.innerText = msg; el.style.color = color; el.classList.add('show');
+            el.innerHTML = `<div class="flex-row" style="gap:8px;">${iconSvg} <span>${msg}</span></div>`; 
+            el.style.color = color; 
+            el.classList.add('show');
             clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
         }
 
-        function logAndToast(toastMsg, logMsg, color) {
+        function dropBookmark(label, iconKey) { toast(icons[iconKey] || icons.bookmark, label); }
+
+        function logAndToast(iconSvg, toastMsg, logMsg, color) {
             state.logs.push(`[${getTS()}] ${logMsg}`);
-            toast(toastMsg, color);
+            toast(iconSvg, toastMsg, color);
             const logBox = document.getElementById('errorLogContainer');
             if(logBox) logBox.innerHTML = state.logs.join('<br>');
         }
@@ -396,14 +482,14 @@
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         
         function copyErrorLog() {
-            if(!state.logs.length) return toast('⚠️ No logs to copy');
+            if(!state.logs.length) return toast(icons.alert, 'No logs to copy', 'var(--warning-color)');
             const ta = document.createElement("textarea"); ta.value = state.logs.join('\n');
             ta.style.position = "fixed"; document.body.appendChild(ta); ta.select();
-            try { document.execCommand('copy') ? toast('📋 Copied') : toast('❌ Failed'); } catch(e) {}
+            try { document.execCommand('copy') ? toast(icons.check, 'Copied successfully', 'var(--success-color)') : toast(icons.alert, 'Copy Failed', 'var(--danger-color)'); } catch(e) {}
             document.body.removeChild(ta); closeModal('errorLogModal');
         }
 
-        function submitTicket() { closeModal('ticketModal'); toast('🎟️ Ticket Submitted'); }
+        function submitTicket() { closeModal('ticketModal'); toast(icons.ticket, 'Ticket Submitted', 'var(--primary-color)'); }
         
         function applyPreset(val) {
             if(val === 'none') return;
@@ -424,7 +510,7 @@
         function removeOp(index) { state.tempOps.splice(index, 1); renderOps(); }
         function renderOps() {
             document.getElementById('selectedOperators').innerHTML = state.tempOps.map((op, i) => 
-                `<div class="op-tag">${op} <span style="cursor:pointer" onclick="removeOp(${i})">&times;</span></div>`
+                `<div class="op-tag">${op} <span style="cursor:pointer" onclick="removeOp(${i})">${icons.x}</span></div>`
             ).join('');
         }
 
@@ -433,7 +519,7 @@
             state.schema = p !== 'none' ? schemas.find(x => x.id === p).label : 'Custom';
             closeModal('metadataModal');
             render();
-            toast('✅ Metadata Applied');
+            toast(icons.check, 'Metadata Applied', 'var(--success-color)');
         }
 
         // Init
